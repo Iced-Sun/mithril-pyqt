@@ -12,33 +12,40 @@ def m_impl(tag, *args):
     ## parse args
     tag_args, attributes, children = (), {}, None
 
-    ## maybe too aggressive?
+    ## for list::pop()
+    args = list(args)
+
+    ## arguments being forwarded to tag constructor
     #if len(args) > 0 and isinstance(args[0], (str, tuple, _M._M_placeholder, QObject)):
     if len(args) > 0 and isinstance(args[0], (str, tuple)):
-        tag_args = args[0] if isinstance(args[0], tuple) else (args[0],)
-        args = args[1:]
+        arg = args.pop(0)
+        tag_args = arg if isinstance(arg, tuple) else (arg,)
+        pass
 
-    if len(args) > 0 and isinstance(args[0], dict):
-        attributes = args[0]
-        args = args[1:]
+    ## attributes for the tag
+    if len(args) > 0 and isinstance(args[0], dict) and 'tag' not in args[0]:
+        attributes = args.pop(0)
+        pass
 
+    ## attached children
     if len(args) > 0:
-        children = args[0]
-        args = args[1:]
+        children = args.pop(0)
+        pass
 
+    ## what a surprise
     if len(args) > 0:
         raise RuntimeError('m() called with wrong number of arguments.')
 
     ## children should be a list of tuples
-    children = [
-        child if isinstance(child, tuple) else (child,)
-        for child in (children if isinstance(children, list) else [children])
-        if child is not None
-    ]
+    #children = [
+    #    child if isinstance(child, tuple) else (child,)
+    #    for child in (children if isinstance(children, list) else [children])
+    #    if child is not None
+    #]
 
     return {'tag': tag, 'args': list(tag_args), 'attrs': attributes, 'children': children}
 
-def build(cell, cached=None):
+def build(parent_element, cell, cached=None):
     if isinstance(cell['tag'], str):
         from PyQt5 import QtWidgets
         if 'Q{}'.format(cell['tag']) in QtWidgets.__dict__:
@@ -49,7 +56,13 @@ def build(cell, cached=None):
         cell_type = cell['tag']
         pass
 
-    element = cell_type(*cell['args'])
+    element = cell_type(*cell['args'], parent_element)
+
+    if isinstance(cell['children'], dict):
+        ## the only child
+        child_element = build(element, cell['children'])
+    else:
+        pass
 
     for key, val in cell['attrs'].items():
         if hasattr(element, _snake_to_camel('set_'+key)):
@@ -65,7 +78,7 @@ def build(cell, cached=None):
     return element
 
 def render_impl(root, cell, forceRecreation=False):
-    cache = build(cell)
+    cache = build(root, cell)
     cache.show()
     #configs()
     return cache
