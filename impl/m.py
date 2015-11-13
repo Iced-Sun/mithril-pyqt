@@ -6,11 +6,11 @@ def _snake_to_camel(name, capitalize_first=False):
         return components[0] + ''.join(x.capitalize() for x in components[1:])
 
 def m_impl(tag, *args):
-    ## pythonic
-    tag = _snake_to_camel(tag, capitalize_first=True) if isinstance(tag, str) else tag
+    ## the output
+    cell = {}
 
-    ## parse args
-    tag_args, attributes, children = (), {}, None
+    ## pythonic
+    cell['tag'] = _snake_to_camel(tag, capitalize_first=True) if isinstance(tag, str) else tag
 
     ## for list::pop()
     args = list(args)
@@ -19,17 +19,17 @@ def m_impl(tag, *args):
     #if len(args) > 0 and isinstance(args[0], (str, tuple, _M._M_placeholder, QObject)):
     if len(args) > 0 and isinstance(args[0], (str, tuple)):
         arg = args.pop(0)
-        tag_args = arg if isinstance(arg, tuple) else (arg,)
+        cell['args'] = list(arg if isinstance(arg, tuple) else (arg,))
         pass
 
     ## attributes for the tag
     if len(args) > 0 and isinstance(args[0], dict) and 'tag' not in args[0]:
-        attributes = args.pop(0)
+        cell['attrs'] = args.pop(0)
         pass
 
     ## attached children
     if len(args) > 0:
-        children = args.pop(0)
+        cell['children'] = args.pop(0)
         pass
 
     ## what a surprise
@@ -43,7 +43,7 @@ def m_impl(tag, *args):
     #    if child is not None
     #]
 
-    return {'tag': tag, 'args': list(tag_args), 'attrs': attributes, 'children': children}
+    return cell
 
 def build(parent_element, cell, cached=None):
     if isinstance(cell['tag'], str):
@@ -56,15 +56,16 @@ def build(parent_element, cell, cached=None):
         cell_type = cell['tag']
         pass
 
-    element = cell_type(*cell['args'], parent_element)
+    element = cell_type(*cell.get('args',[]), parent_element)
 
-    if isinstance(cell['children'], dict):
+    children = cell.get('children')
+    if isinstance(children, dict):
         ## the only child
-        child_element = build(element, cell['children'])
+        child_element = build(element, children)
     else:
         pass
 
-    for key, val in cell['attrs'].items():
+    for key, val in cell.get('attrs',{}).items():
         if hasattr(element, _snake_to_camel('set_'+key)):
             ## properties that can be set
             #if val is _M._parent:
