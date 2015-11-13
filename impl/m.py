@@ -9,18 +9,30 @@ def m_impl(tag, *args):
     ## the output
     cell = {}
 
+    ## wrap tag and tag_args in a list
+    if not isinstance(tag, tuple):
+        tag = [tag]
+    else:
+        tag = list(tag)
+        pass
+
     ## pythonic
-    cell['tag'] = _snake_to_camel(tag, capitalize_first=True) if isinstance(tag, str) else tag
+    if isinstance(tag[0], str):
+        tag[0] = _snake_to_camel(tag[0], capitalize_first=True)
+        pass
+
+    ## set tag
+    cell['tag'] = tag
 
     ## for list::pop()
     args = list(args)
 
     ## arguments being forwarded to tag constructor
     #if len(args) > 0 and isinstance(args[0], (str, tuple, _M._M_placeholder, QObject)):
-    if len(args) > 0 and isinstance(args[0], (str, tuple)):
-        arg = args.pop(0)
-        cell['args'] = list(arg if isinstance(arg, tuple) else (arg,))
-        pass
+    #if len(args) > 0 and isinstance(args[0], (str, tuple)):
+    #    arg = args.pop(0)
+    #    cell['args'] = list(arg if isinstance(arg, tuple) else (arg,))
+    #    pass
 
     ## attributes for the tag
     if len(args) > 0 and isinstance(args[0], dict) and 'tag' not in args[0]:
@@ -46,18 +58,21 @@ def m_impl(tag, *args):
     return cell
 
 def build(parent_element, cell, cached=None):
-    if isinstance(cell['tag'], str):
+    ## parse tag
+    if isinstance(cell['tag'][0], str):
         from PyQt5 import QtWidgets
-        if 'Q{}'.format(cell['tag']) in QtWidgets.__dict__:
-            cell_type = getattr(QtWidgets, 'Q{}'.format(cell['tag']))
+        if 'Q{}'.format(cell['tag'][0]) in QtWidgets.__dict__:
+            cell_type = getattr(QtWidgets, 'Q{}'.format(cell['tag'][0]))
         else:
-            raise RuntimeError('Tag "{}" is not a supported widget type.'.format(cell['tag']))
+            raise RuntimeError('Tag "{}" is not a supported widget type.'.format(cell['tag'][0]))
     else:
-        cell_type = cell['tag']
+        cell_type = cell['tag'][0]
         pass
 
-    element = cell_type(*cell.get('args',[]), parent_element)
+    ## create this element
+    element = cell_type(*cell['tag'][1:], parent_element)
 
+    ## create children
     children = cell.get('children')
     if isinstance(children, dict):
         ## the only child
