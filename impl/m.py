@@ -5,7 +5,7 @@ def _snake_to_camel(name, capitalize_first=False):
     else:
         return components[0] + ''.join(x.capitalize() for x in components[1:])
 
-def m_impl(tag, *args):
+def m(tag, *args):
     ## the output
     cell = {}
 
@@ -93,13 +93,13 @@ def build(parent_element, cell, cached=None):
     
     return element
 
-def render_impl(root, cell, forceRecreation=False):
+def render(root, cell, forceRecreation=False):
     cache = build(root, cell)
     cache.show()
     #configs()
     return cache
     
-def mount_impl(parent, Component, mount_method=None):
+def mount(parent, Component, mount_method=None):
     app = QApplication(sys.argv)
 
     if hasattr(Component, 'Controller'):

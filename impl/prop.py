@@ -10,5 +10,5 @@ class Property(object):
         self._value = val
         pass
 
-def prop_impl():
+def prop():
     return
