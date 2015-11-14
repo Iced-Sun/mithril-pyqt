@@ -27,13 +27,6 @@ def m(tag, *args):
     ## for list::pop()
     args = list(args)
 
-    ## arguments being forwarded to tag constructor
-    #if len(args) > 0 and isinstance(args[0], (str, tuple, _M._M_placeholder, QObject)):
-    #if len(args) > 0 and isinstance(args[0], (str, tuple)):
-    #    arg = args.pop(0)
-    #    cell['args'] = list(arg if isinstance(arg, tuple) else (arg,))
-    #    pass
-
     ## attributes for the tag
     if len(args) > 0 and isinstance(args[0], dict) and 'tag' not in args[0]:
         cell['attrs'] = args.pop(0)
