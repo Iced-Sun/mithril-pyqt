@@ -50,45 +50,40 @@ def m(tag, *args):
 
     return cell
 
-def build_dict(parent_element, cell, cached):
+def build_dict(parent_element, data, cached):
     ## parse tag
-    if isinstance(cell['tag'][0], str):
+    if isinstance(data['tag'][0], str):
         from PyQt5 import QtWidgets
-        if 'Q{}'.format(cell['tag'][0]) in QtWidgets.__dict__:
-            cell_type = getattr(QtWidgets, 'Q{}'.format(cell['tag'][0]))
+        if 'Q{}'.format(data['tag'][0]) in QtWidgets.__dict__:
+            element_type = getattr(QtWidgets, 'Q{}'.format(data['tag'][0]))
         else:
-            raise RuntimeError('Tag "{}" is not a supported widget type.'.format(cell['tag'][0]))
+            raise RuntimeError('Tag "{}" is not a supported widget type.'.format(data['tag'][0]))
     else:
-        cell_type = cell['tag'][0]
+        element_type = data['tag'][0]
         pass
 
     ## create this element
-    element = cell_type(*cell['tag'][1:], parent_element)
+    element = element_type(*data['tag'][1:], parent_element)
 
-    ## create children
-    children = cell.get('children')
-    if isinstance(children, dict):
-        ## the only child
-        child_element = build(element, children)
-    else:
-        pass
+    ## build children
+    children = build(element, data.get('children'), cached)
 
-    for key, val in cell.get('attrs',{}).items():
+    ## apply attributes
+    for key, val in data.get('attrs',{}).items():
         if hasattr(element, _snake_to_camel('set_'+key)):
-            ## properties that can be set
-            #if val is _M._parent:
-            #    val = parent_element
-            #        else:
-            #            pass
             getattr(element, _snake_to_camel('set_'+key))(val)
             pass
+        else:
+            raise RuntimeError('Unexpected attribute {}'.format(key))
         continue
-    
-def build(parent_element, cell, cached=None):
-    if isinstance(cell, dict):
-        element = build_dict(parent_element, cell, cached)
+
+    return element
+
+def build(parent_element, data, cached=None):
+    if isinstance(data, dict):
+        element = build_dict(parent_element, data, cached)
     else:
-        element = None
+        raise RuntimeError('Unexpected cell {}'.format(data))
     return element
 
 def render(root, cell, forceRecreation=False):
