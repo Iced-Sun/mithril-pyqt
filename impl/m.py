@@ -82,29 +82,47 @@ def build_dict(parent_element, data, cached):
     return element
 
 def build_list(parent_element, data, cached, layout):
+    ## get the layout factory
     if layout == 'HBox':
         from PyQt5.QtWidgets import QHBoxLayout
-        container = QHBoxLayout(parent_element)
+        container_type = QHBoxLayout
     elif layout == 'VBox':
         from PyQt5.QtWidgets import QVBoxLayout
-        container = QVBoxLayout(parent_element)
+        container_type = QVBoxLayout
     else:
         pass
 
+    ## this layout could be a root layout of parent_element, or a nested one
+    if parent_element is not None and parent_element.layout() is None:
+        container = container_type(parent_element)
+    else:
+        container = container_type()
+        pass
+
+    ## iterate on children
     for cell in data:
         if isinstance(cell, str):
             getattr(container, _snake_to_camel('add_{}'.format(cell)))()
         elif isinstance(cell, tuple):
             getattr(container, _snake_to_camel('add_{}'.format(cell[0])))(*cell[1:])
         else:
-            element = build(parent_element, cell)
-            container.addWidget(element)
+            ## create the element without parent, since it will be auto
+            ## reparenting
+            element = build(None, cell)
+            from PyQt5.QtWidgets import QLayout
+            if isinstance(element, QLayout):
+                container.addLayout(element)
+            else:
+                ## FIXME should we check?
+                container.addWidget(element)
+                pass
             pass
         continue
 
     return container
 
 def build(parent_element, data, cached=None):
+    ## dispatch on data type
     if isinstance(data, dict):
         element = build_dict(parent_element, data, cached)
     elif isinstance(data, list):
