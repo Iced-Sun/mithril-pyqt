@@ -82,6 +82,9 @@ def build_dict(parent_element, data, cached):
 def build(parent_element, data, cached=None):
     if isinstance(data, dict):
         element = build_dict(parent_element, data, cached)
+    elif data is None:
+        ## could be None when trying to build children
+        element = None
     else:
         raise RuntimeError('Unexpected cell {}'.format(data))
     return element
