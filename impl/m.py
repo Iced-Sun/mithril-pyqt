@@ -79,10 +79,15 @@ def build_dict(parent_element, data, cached):
 
     return element
 
-def build_list(parent_element, data, cached):
-    ## always use layout
-    from PyQt5.QtWidgets import QHBoxLayout
-    container = QHBoxLayout(parent_element)
+def build_list(parent_element, data, cached, layout):
+    if layout == 'HBox':
+        from PyQt5.QtWidgets import QHBoxLayout
+        container = QHBoxLayout(parent_element)
+    elif layout == 'VBox':
+        from PyQt5.QtWidgets import QVBoxLayout
+        container = QVBoxLayout(parent_element)
+    else:
+        pass
 
     for cell in data:
         if isinstance(cell, str):
@@ -101,7 +106,9 @@ def build(parent_element, data, cached=None):
     if isinstance(data, dict):
         element = build_dict(parent_element, data, cached)
     elif isinstance(data, list):
-        element = build_list(parent_element, data, cached)
+        element = build_list(parent_element, data, cached, 'HBox')
+    elif isinstance(data, tuple):
+        element = build_list(parent_element, data, cached, 'VBox')
     elif data is None:
         ## could be None when trying to build children
         element = None
