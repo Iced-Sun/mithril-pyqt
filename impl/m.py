@@ -87,6 +87,8 @@ def build_list(parent_element, data, cached):
     for cell in data:
         if isinstance(cell, str):
             getattr(container, _snake_to_camel('add_{}'.format(cell)))()
+        elif isinstance(cell, tuple):
+            getattr(container, _snake_to_camel('add_{}'.format(cell[0])))(*cell[1:])
         else:
             element = build(parent_element, cell)
             container.addWidget(element)
