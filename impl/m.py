@@ -6,10 +6,9 @@ def _snake_to_camel(name, capitalize_first=False):
         return components[0] + ''.join(x.capitalize() for x in components[1:])
 
 def m(tag, *args):
-    ## the output
     cell = {}
 
-    ## wrap tag and tag_args in a list
+    ## parse tag and its arguments
     if not isinstance(tag, tuple):
         tag = [tag]
     else:
@@ -28,18 +27,21 @@ def m(tag, *args):
     args = list(args)
 
     ## attributes for the tag
+    # assume it's a dict without 'tag' key
     if len(args) > 0 and isinstance(args[0], dict) and 'tag' not in args[0]:
         cell['attrs'] = args.pop(0)
         pass
 
     ## attached children
-    if len(args) > 0:
+    # assume it's a list, a tuple, or a dict with a 'tag' key
+    if len(args) > 0 and isinstance(args[0], (list, tuple, dict)):
         cell['children'] = args.pop(0)
         pass
 
-    ## what a surprise
+    ## forward rest arguments to tag
     if len(args) > 0:
-        raise RuntimeError('m() called with wrong number of arguments.')
+        tag += args
+        pass
 
     ## children should be a list of tuples
     #children = [
