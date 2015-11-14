@@ -79,9 +79,27 @@ def build_dict(parent_element, data, cached):
 
     return element
 
+def build_list(parent_element, data, cached):
+    ## always use layout
+    from PyQt5.QtWidgets import QHBoxLayout
+    container = QHBoxLayout(parent_element)
+
+    for cell in data:
+        if isinstance(cell, str):
+            getattr(container, _snake_to_camel('add_{}'.format(cell)))()
+        else:
+            element = build(parent_element, cell)
+            container.addWidget(element)
+            pass
+        continue
+
+    return container
+
 def build(parent_element, data, cached=None):
     if isinstance(data, dict):
         element = build_dict(parent_element, data, cached)
+    elif isinstance(data, list):
+        element = build_list(parent_element, data, cached)
     elif data is None:
         ## could be None when trying to build children
         element = None
