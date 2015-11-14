@@ -50,7 +50,7 @@ def m(tag, *args):
 
     return cell
 
-def build(parent_element, cell, cached=None):
+def build_dict(parent_element, cell, cached):
     ## parse tag
     if isinstance(cell['tag'][0], str):
         from PyQt5 import QtWidgets
@@ -84,6 +84,11 @@ def build(parent_element, cell, cached=None):
             pass
         continue
     
+def build(parent_element, cell, cached=None):
+    if isinstance(cell, dict):
+        element = build_dict(parent_element, cell, cached)
+    else:
+        element = None
     return element
 
 def render(root, cell, forceRecreation=False):
