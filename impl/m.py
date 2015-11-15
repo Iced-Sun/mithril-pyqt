@@ -105,7 +105,9 @@ def build_list(parent_element, data, cached, layout):
     for cell in data:
         if isinstance(cell, str):
             getattr(container, _snake_to_camel('add_{}'.format(cell)))()
-        elif isinstance(cell, tuple):
+        elif isinstance(cell, tuple) and isinstance(cell[0], str):
+            ## FIXME tuple can represent a VBoxLayout or an in-place item
+            ## insertion; really need such subtlety?
             getattr(container, _snake_to_camel('add_{}'.format(cell[0])))(*cell[1:])
         else:
             ## create the element without parent, since it will be auto
