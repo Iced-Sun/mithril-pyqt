@@ -23,25 +23,27 @@ def m(tag, *args):
     ## set tag
     cell['tag'] = tag
 
-    ## for list::pop()
+    ## parse args in reverse order
+    # for list::pop()
     args = list(args)
-
-    ## attributes for the tag
-    # assume it's a dict without 'tag' key
-    if len(args) > 0 and isinstance(args[0], dict) and 'tag' not in args[0]:
-        cell['attrs'] = args.pop(0)
-        pass
 
     ## attached children
     # assume it's a list, a tuple, or a dict with a 'tag' key
-    if len(args) > 0 and isinstance(args[0], (list, tuple, dict)):
-        cell['children'] = args.pop(0)
+    if args and (
+            isinstance(args[-1], (list, tuple))
+            or (isinstance(args[-1], dict) and 'tag' in args[-1]
+            )):
+        cell['children'] = args.pop()
+        pass
+
+    ## attributes for the tag
+    # assume it's a dict without 'tag' key
+    if args and isinstance(args[-1], dict) and 'tag' not in args[-1]:
+        cell['attrs'] = args.pop()
         pass
 
     ## forward rest arguments to tag
-    if len(args) > 0:
-        tag += args
-        pass
+    tag += args
 
     ## children should be a list of tuples
     #children = [
