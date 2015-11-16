@@ -1,5 +1,8 @@
 def _snake_to_camel(name, capitalize_first=False):
     components = name.split('_')
+    if len(components) == 1:
+        return name
+
     if capitalize_first:
         return ''.join(x.capitalize() for x in components)
     else:
