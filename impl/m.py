@@ -82,7 +82,20 @@ def build_dict(parent_element, data, cached):
             getattr(element, _snake_to_camel('set_'+key))(val)
             pass
         elif key.startswith('on_') and hasattr(element, _snake_to_camel(key[3:])):
-            getattr(element, _snake_to_camel(key[3:])).connect(val)
+            signal = getattr(element, _snake_to_camel(key[3:]))
+            if callable(val):
+                signal.connect(val)
+            elif isinstance(val, dict):
+                if val['selector'].startswith('#'):
+                    from impl.query import get_element_by_id
+                    target_element = get_element_by_id(val['selector'][1:])
+                    if target_element is not None:
+                        signal.connect(getattr(target_element, _snake_to_camel(val['slot'])))
+                        pass
+                    pass
+                pass
+            else:
+                raise RuntimeError('slot value {} to signal {} is malformed'.format(val, key))
         elif key == 'id':
             from impl.query import _m_constructed_elements
             if val in _m_constructed_elements:
