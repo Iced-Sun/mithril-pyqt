@@ -96,6 +96,9 @@ def build_dict(parent_element, data, cached):
                 pass
             else:
                 raise RuntimeError('slot value {} to signal {} is malformed'.format(val, key))
+        elif key.endswith('_on') and hasattr(element, _snake_to_camel(key[:-3])):
+            slot = getattr(element, _snake_to_camel(key[:-3]))
+            val.connect(slot)
         elif key == 'id':
             from impl.query import _m_constructed_elements
             if val in _m_constructed_elements:
