@@ -84,10 +84,7 @@ def build_dict(parent_element, data, cached):
         elif key.startswith('on_') and hasattr(element, _snake_to_camel(key[3:])):
             getattr(element, _snake_to_camel(key[3:])).connect(val)
         elif key == 'id':
-            if '_m_constructed_elements' not in globals():
-                globals()['_m_constructed_elements'] = {}
-                pass
-            global _m_constructed_elements
+            from impl.query import _m_constructed_elements
             if val in _m_constructed_elements:
                 raise RuntimeError('The element with id {} already exists.'.format(val))
             else:
