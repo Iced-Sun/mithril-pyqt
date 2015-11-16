@@ -86,11 +86,20 @@ def build_dict(parent_element, data, cached):
             if callable(val):
                 signal.connect(val)
             elif isinstance(val, dict):
-                if val['selector'].startswith('#'):
+                if 'selector' not in val:
+                    parts = val['slot'].split('::')
+                    selector = parts[0]
+                    method = parts[1]
+                else:
+                    selector = val['selector']
+                    method = val['slot']
+                    pass
+
+                if selector.startswith('#'):
                     from impl.query import get_element_by_id
-                    target_element = get_element_by_id(val['selector'][1:])
+                    target_element = get_element_by_id(selector[1:])
                     if target_element is not None:
-                        signal.connect(getattr(target_element, _snake_to_camel(val['slot'])))
+                        signal.connect(getattr(target_element, _snake_to_camel(method)))
                         pass
                     pass
                 pass
