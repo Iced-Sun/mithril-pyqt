@@ -8,21 +8,6 @@ def _snake_to_camel(name, capitalize_first=False):
 def m(tag, *args):
     cell = {}
 
-    ## parse tag and its arguments
-    if not isinstance(tag, tuple):
-        tag = [tag]
-    else:
-        tag = list(tag)
-        pass
-
-    ## pythonic
-    if isinstance(tag[0], str):
-        tag[0] = _snake_to_camel(tag[0], capitalize_first=True)
-        pass
-
-    ## set tag
-    cell['tag'] = tag
-
     ## parse args in reverse order
     # for list::pop()
     args = list(args)
@@ -42,9 +27,34 @@ def m(tag, *args):
         cell['attrs'] = args.pop()
         pass
 
-    ## forward rest arguments to tag
-    tag += args
+    ## extract tag and its arguments
+    if not isinstance(tag, tuple):
+        tag = [tag]
+    else:
+        tag = list(tag)
+        pass
 
+    ## parse tag string
+    if isinstance(tag[0], str):
+        ## pythonic tag name
+        tag[0] = _snake_to_camel(tag[0], capitalize_first=True)
+        ## extract tag id
+        splitted = tag[0].split('#')
+        if len(splitted) == 2:
+            tag[0] = splitted[0]
+            cell['attrs'] = cell.get('attrs', {})
+            cell['attrs']['id'] = splitted[1]
+        elif len(splitted) == 1:
+            pass
+        else:
+            raise RuntimeError('malformat tag name: {}'.format(tag[0]))
+        pass
+
+    ## set tag
+    cell['tag'] = tag
+
+    ## forward rest arguments to tag
+    cell['tag'] += args
 
     return cell
 
@@ -70,6 +80,19 @@ def build_dict(parent_element, data, cached):
     for key, val in data.get('attrs',{}).items():
         if hasattr(element, _snake_to_camel('set_'+key)):
             getattr(element, _snake_to_camel('set_'+key))(val)
+            pass
+        elif key.startswith('on_') and hasattr(element, _snake_to_camel(key[3:])):
+            getattr(element, _snake_to_camel(key[3:])).connect(val)
+        elif key == 'id':
+            if '_m_constructed_elements' not in globals():
+                globals()['_m_constructed_elements'] = {}
+                pass
+            global _m_constructed_elements
+            if val in _m_constructed_elements:
+                raise RuntimeError('The element with id {} already exists.'.format(val))
+            else:
+                _m_constructed_elements[val] = element
+                pass
             pass
         else:
             raise RuntimeError('Unexpected attribute {}'.format(key))
