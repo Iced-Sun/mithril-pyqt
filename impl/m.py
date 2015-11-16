@@ -45,12 +45,6 @@ def m(tag, *args):
     ## forward rest arguments to tag
     tag += args
 
-    ## children should be a list of tuples
-    #children = [
-    #    child if isinstance(child, tuple) else (child,)
-    #    for child in (children if isinstance(children, list) else [children])
-    #    if child is not None
-    #]
 
     return cell
 
