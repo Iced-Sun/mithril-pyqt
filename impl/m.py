@@ -1,12 +1,6 @@
 def _snake_to_camel(name, capitalize_first=False):
     components = name.split('_')
-    if len(components) == 1:
-        return name
-
-    if capitalize_first:
-        return ''.join(x.capitalize() for x in components)
-    else:
-        return components[0] + ''.join(x.capitalize() for x in components[1:])
+    return ''.join(x.capitalize() for x in components) if capitalize_first else components[0] + ''.join(x.capitalize() for x in components[1:])
 
 def m(tag, *args):
     cell = {}
