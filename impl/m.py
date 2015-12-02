@@ -140,14 +140,15 @@ def build_list(parent_element, data, attrs, cached):
     if 'layout' in attrs:
         layout = attrs['layout']
     elif isinstance(data, list):
-        layout = 'h_box_layout'
+        layout = 'h_box'
     elif isinstance(data, tuple):
-        layout = 'v_box_layout'
+        layout = 'v_box'
     else:
         raise RuntimeError('Cannot determine the layout type')
 
     ## get the layout factory
     if isinstance(layout, str):
+        layout = layout if layout.endswith('_layout') else layout+'_layout'
         container_type = impl.qt_inspector.find_qt_class('Q' + _snake_to_camel(layout, capitalize_first=True))
     else:
         container_type = layout
