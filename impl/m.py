@@ -132,16 +132,25 @@ def build_dict(parent_element, data, cached):
 
     return element
 
-def build_list(parent_element, data, attrs, cached):
-    if attrs is None:
+def build_list(parent_element, data, cached):
+    ## try the best to extract attributes of the list
+    if len(data) > 0 and isinstance(data[0], dict) and 'tag' not in data[0]:
+        if len(data[0]) > 1 or 'layout' in data[0]:
+            attrs = data[0]
+            cells = data[1:]
+        else:
+            raise RuntimeError('The first layout element {} is ambiguous.'.format(data[0]))
+    else:
         attrs = {}
+        cells = data
         pass
 
+    ## pick a layout
     if 'layout' in attrs:
         layout = attrs['layout']
-    elif isinstance(data, list):
+    elif isinstance(cells, list):
         layout = 'h_box'
-    elif isinstance(data, tuple):
+    elif isinstance(cells, tuple):
         layout = 'v_box'
     else:
         raise RuntimeError('Cannot determine the layout type')
@@ -171,13 +180,15 @@ def build_list(parent_element, data, attrs, cached):
         continue
 
     ## add child items
-    for i, cell in enumerate(data):
+    for i, cell in enumerate(cells):
         if isinstance(cell, str):
             getattr(container, _snake_to_camel('add_{}'.format(cell)))()
-        elif isinstance(cell, tuple) and isinstance(cell[0], str):
-            ## FIXME tuple can represent a VBoxLayout or an in-place item
-            ## insertion; really need such subtlety?
-            getattr(container, _snake_to_camel('add_{}'.format(cell[0])))(*cell[1:])
+        elif isinstance(cell, dict) and 'tag' not in cell:
+            if len(cell) != 1:
+                raise RuntimeError('A dict item inside a layout must have exact one key. {}'.format(cell))
+            for key, val in cell.items():
+                getattr(container, _snake_to_camel('add_{}'.format(key)))(*(val if isinstance(val, tuple) else (val,)))
+                continue
         else:
             ## create the element without parent, since it will be auto
             ## re-parenting
@@ -200,10 +211,7 @@ def build(parent_element, data, cached=None):
     if isinstance(data, dict):
         element = build_dict(parent_element, data, cached)
     elif isinstance(data, (list, tuple)):
-        if len(data) > 0 and isinstance(data[0], dict) and 'tag' not in data[0]:
-            element = build_list(parent_element, data[1:], data[0], cached)
-        else:
-            element = build_list(parent_element, data, None, cached)
+        element = build_list(parent_element, data, cached)
     elif data is None:
         ## could be None when trying to build children
         element = None
