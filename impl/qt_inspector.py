@@ -14,6 +14,15 @@ def get_default_attach_method(Parent, Child):
 
     if Parent is type(None) or Child is type(None):
         pass
+    elif issubclass(Parent, QLayout):
+        if issubclass(Child, QLayout):
+            method = Parent.addLayout
+        elif issubclass(Child, QMenuBar):
+            method = Parent.setMenuBar
+        elif issubclass(Child, QWidget):
+            method = Parent.addWidget
+        else:
+            method = None
     elif issubclass(Child, QMenu):
         if issubclass(Parent, (QMenuBar, QMenu)):
             method = Parent.addMenu

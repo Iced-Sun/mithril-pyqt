@@ -155,13 +155,8 @@ def build_list(parent_element, data, cached, layout):
             ## re-parenting
             element = build(None, cell)
 
-            from PyQt5.QtWidgets import QLayout
-            if isinstance(element, QLayout):
-                container.addLayout(element)
-            else:
-                ## FIXME should we check?
-                container.addWidget(element)
-                pass
+            ## attach the element to the container
+            impl.qt_inspector.apply_attach_method(container, element)
             pass
         continue
 
