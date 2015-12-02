@@ -75,10 +75,7 @@ def build_dict(parent_element, data, cached):
     ## bar)
     impl.qt_inspector.apply_attach_method(parent_element, element)
 
-    ## build children
-    children = build(element, data.get('children'), cached)
-
-    ## apply attributes
+    ## apply attributes on this element
     for key, val in data.get('attrs',{}).items():
         if hasattr(element, _snake_to_camel('set_'+key)):
             getattr(element, _snake_to_camel('set_'+key))(val)
@@ -121,6 +118,9 @@ def build_dict(parent_element, data, cached):
         else:
             raise RuntimeError('Unexpected attribute {}'.format(key))
         continue
+
+    ## build children
+    children = build(element, data.get('children'), cached)
 
     return element
 
