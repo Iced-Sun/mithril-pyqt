@@ -1,9 +1,10 @@
 from config import *
 
+## TODO span and optional arguments support
 run([
     ('G41', m('widget', [
         {
-            'layout': 'grid_layout',
+            'layout': 'grid',
         },
         label('1'),
         label('2'),
@@ -13,7 +14,7 @@ run([
 
     ('G22', m('widget', [
         {
-            'layout': 'grid_layout',
+            'layout': 'grid',
             'columns': 2
         },
         label('1'), label('2'),
@@ -22,7 +23,7 @@ run([
 
     ('G33', m('widget', [
         {
-            'layout': 'grid_layout',
+            'layout': 'grid',
             'columns': 3,
         },
         label('1'), None,       label('3'),
@@ -32,7 +33,7 @@ run([
 
     ('G+nest', m('widget', [
         {
-            'layout': 'grid_layout',
+            'layout': 'grid',
             'columns': 2
         },
         [label('1-1'), label('1-2')],
