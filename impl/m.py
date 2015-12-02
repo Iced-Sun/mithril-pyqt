@@ -60,7 +60,12 @@ def m(tag, *args):
 
 def apply_attribute_to(element, key, val):
     if hasattr(element, _snake_to_camel('set_'+key)):
-        getattr(element, _snake_to_camel('set_'+key))(val)
+        if isinstance(val, dict) and 'tag' in val:
+            ## this is a m() constructed element
+            getattr(element, _snake_to_camel('set_'+key))(build(None, val))
+        else:
+            getattr(element, _snake_to_camel('set_'+key))(val)
+            pass
     elif key.startswith('on_') and hasattr(element, _snake_to_camel(key[3:])):
         signal = getattr(element, _snake_to_camel(key[3:]))
         if callable(val):
