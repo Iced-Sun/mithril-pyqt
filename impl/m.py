@@ -69,6 +69,12 @@ def build_dict(parent_element, data, cached):
     ## create this element with parent
     element = element_type(*data['tag'][1:], parent_element)
 
+    ## additional actions to attach the element (because making an child
+    ## element in QT is mainly for memory management, and sometimes for
+    ## display, e.g., QMenu(parent=QMenuBar) doesn't show the menu in the menu
+    ## bar)
+    impl.qt_inspector.apply_attach_method(parent_element, element)
+
     ## build children
     children = build(element, data.get('children'), cached)
 
