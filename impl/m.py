@@ -134,7 +134,7 @@ def build_dict(parent_element, data, cached):
 
 def build_list(parent_element, data, cached):
     ## try the best to extract attributes of the list
-    if len(data) > 0 and isinstance(data[0], dict) and 'tag' not in data[0]:
+    if len(data) and isinstance(data[0], dict) and 'tag' not in data[0] and 'widget' not in data[0]:
         if len(data[0]) > 1 or 'layout' in data[0]:
             attrs = data[0]
             cells = data[1:]
@@ -187,7 +187,20 @@ def build_list(parent_element, data, cached):
             if len(cell) != 1:
                 raise RuntimeError('A dict item inside a layout must have exact one key. {}'.format(cell))
             for key, val in cell.items():
-                getattr(container, _snake_to_camel('add_{}'.format(key)))(*(val if isinstance(val, tuple) else (val,)))
+                bound_method = getattr(container, _snake_to_camel('add_{}'.format(key)))
+
+                args = list(val) if isinstance(val, tuple) else [val]
+
+                kwargs = {}
+                if len(args) and isinstance(args[-1], dict) and 'tag' not in args[-1]:
+                    kwargs = args.pop()
+                    pass
+
+                if key == 'widget' and 'tag' in args[0]:
+                    args[0] = build(None, args[0])
+                    pass
+
+                bound_method(*args, **kwargs)
                 continue
         else:
             ## create the element without parent, since it will be auto
