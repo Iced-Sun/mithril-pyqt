@@ -164,13 +164,13 @@ def build_list(parent_element, data, attrs, cached):
 
     ## apply attributes to the layout
     for key, val in attrs.items():
-        if key != 'layout':
+        if key not in ('layout', 'columns'):
             apply_attribute_to(container, key, val)
             pass
         continue
 
     ## add child items
-    for cell in data:
+    for i, cell in enumerate(data):
         if isinstance(cell, str):
             getattr(container, _snake_to_camel('add_{}'.format(cell)))()
         elif isinstance(cell, tuple) and isinstance(cell[0], str):
@@ -183,7 +183,12 @@ def build_list(parent_element, data, attrs, cached):
             element = build(None, cell)
 
             ## attach the element to the container
-            impl.qt_inspector.apply_attach_method(container, element)
+            if 'columns' in attrs:
+                ## a grid layout
+                impl.qt_inspector.apply_attach_method(container, element, *divmod(i, attrs['columns']))
+            else:
+                impl.qt_inspector.apply_attach_method(container, element)
+                pass
             pass
         continue
 
