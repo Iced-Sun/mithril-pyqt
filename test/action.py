@@ -5,21 +5,20 @@ from config import *
 #return m('widget', m('menu', [m('action', 'action1'), m('action', 'action2')]))
 
 run([
-    ('menubar@widget', m('widget', [m('menu_bar', m('menu', 'File', m('action', 'action1'))), label('1'), label('2')])),
+    ('menubar@widget', m('widget', [m('menu_bar', m('menu', 'Menu', m('action', 'Action'))), label('1'), label('2')])),
 
     ('menubar in layout@widget', m('widget', [
         {
             'layout': 'grid_layout',
             'spacing': 100,
-            'menu_bar': m('menu_bar', m('menu', 'File', m('action', 'action1'))),
+            'menu_bar': m('menu_bar', m('menu', 'Menu', m('action', 'Action'))),
         },
         label('1'),
         label('2')
     ])),
 
-    ### FIXME have different behavior
-    #('menu@widget', m('widget', m('menu', 'File', m('action', 'action1')))),
-    #('menu@widget', m('widget', (m('menu', 'File', m('action', 'action1')), label('other')))),
+    ('invisible menu & action@widget', m('widget', m('menu', 'Menu', m('action', 'Action')))),
+    ('invisible menu & visible action@widget', m('widget', (m('menu', 'Menu', m('action', 'Action')), label('Label')))),
 
     #('action@widget', m('widget', m('action', 'action1'))),
 
@@ -39,6 +38,11 @@ we have three relationships to support: parent-child, add_*, set_*
 parent-child is not necessarily visually parent-child
 
 generally, add_* is not owning
+
+rule of thumb:
+set_* is in attribute
+add_* is in children with attach_method
+parent_child is in children
 
 |             | QWidget          | QToolBar   | QMenuBar   | QMenu   | QAction      | misc.                    |
 |-------------+------------------+------------+------------+---------+--------------+--------------------------|
