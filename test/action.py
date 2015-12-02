@@ -7,6 +7,16 @@ from config import *
 run([
     ('menubar@widget', m('widget', [m('menu_bar', m('menu', 'File', m('action', 'action1'))), label('1'), label('2')])),
 
+    ('menubar in layout@widget', m('widget', [
+        {
+            'layout': 'grid_layout',
+            'spacing': 100,
+            'menu_bar': m('menu_bar', m('menu', 'File', m('action', 'action1'))),
+        },
+        label('1'),
+        label('2')
+    ])),
+
     ### FIXME have different behavior
     #('menu@widget', m('widget', m('menu', 'File', m('action', 'action1')))),
     #('menu@widget', m('widget', (m('menu', 'File', m('action', 'action1')), label('other')))),
