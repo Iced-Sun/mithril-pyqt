@@ -40,9 +40,9 @@ def get_default_attach_method(Parent, Child):
 
     return method
 
-def apply_attach_method(parent, child):
+def apply_attach_method(parent, child, *args, **kwargs):
     method = get_default_attach_method(type(parent), type(child))
-    method(parent, child)
+    method(parent, child, *args, **kwargs)
     return
 
 def _get_default_unbound_attach_method(Parent, Child):
