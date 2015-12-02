@@ -124,15 +124,25 @@ def build_dict(parent_element, data, cached):
 
     return element
 
-def build_list(parent_element, data, cached, layout):
-    ## get the layout factory
-    if layout == 'HBox':
-        from PyQt5.QtWidgets import QHBoxLayout
-        container_type = QHBoxLayout
-    elif layout == 'VBox':
-        from PyQt5.QtWidgets import QVBoxLayout
-        container_type = QVBoxLayout
+def build_list(parent_element, data, attrs, cached):
+    if attrs is None:
+        attrs = {}
+        pass
+
+    if 'layout' in attrs:
+        layout = attrs['layout']
+    elif isinstance(data, list):
+        layout = 'h_box_layout'
+    elif isinstance(data, tuple):
+        layout = 'v_box_layout'
     else:
+        raise RuntimeError('Cannot determine the layout type')
+
+    ## get the layout factory
+    if isinstance(layout, str):
+        container_type = impl.qt_inspector.find_qt_class('Q' + _snake_to_camel(layout, capitalize_first=True))
+    else:
+        container_type = layout
         pass
 
     ## this layout could be a root layout of parent_element, or a nested one
@@ -166,10 +176,11 @@ def build(parent_element, data, cached=None):
     ## dispatch on data type
     if isinstance(data, dict):
         element = build_dict(parent_element, data, cached)
-    elif isinstance(data, list):
-        element = build_list(parent_element, data, cached, 'HBox')
-    elif isinstance(data, tuple):
-        element = build_list(parent_element, data, cached, 'VBox')
+    elif isinstance(data, (list, tuple)):
+        if len(data) > 0 and isinstance(data[0], dict) and 'tag' not in data[0]:
+            element = build_list(parent_element, data[1:], data[0], cached)
+        else:
+            element = build_list(parent_element, data, None, cached)
     elif data is None:
         ## could be None when trying to build children
         element = None
