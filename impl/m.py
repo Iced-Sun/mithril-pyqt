@@ -1,3 +1,5 @@
+import impl.qt_inspector
+
 def _snake_to_camel(name, capitalize_first=False):
     components = name.split('_')
     return ''.join(x.capitalize() for x in components) if capitalize_first else components[0] + ''.join(x.capitalize() for x in components[1:])
@@ -35,6 +37,7 @@ def m(tag, *args):
     if isinstance(tag[0], str):
         ## pythonic tag name
         tag[0] = _snake_to_camel(tag[0], capitalize_first=True)
+
         ## extract tag id
         splitted = tag[0].split('#')
         if len(splitted) == 2:
@@ -58,16 +61,12 @@ def m(tag, *args):
 def build_dict(parent_element, data, cached):
     ## parse tag
     if isinstance(data['tag'][0], str):
-        from PyQt5 import QtWidgets
-        if 'Q{}'.format(data['tag'][0]) in QtWidgets.__dict__:
-            element_type = getattr(QtWidgets, 'Q{}'.format(data['tag'][0]))
-        else:
-            raise RuntimeError('Tag "{}" is not a supported widget type.'.format(data['tag'][0]))
+        element_type = impl.qt_inspector.find_qt_class(data['tag'][0])
     else:
         element_type = data['tag'][0]
         pass
 
-    ## create this element
+    ## create this element with parent
     element = element_type(*data['tag'][1:], parent_element)
 
     ## build children
@@ -147,8 +146,9 @@ def build_list(parent_element, data, cached, layout):
             getattr(container, _snake_to_camel('add_{}'.format(cell[0])))(*cell[1:])
         else:
             ## create the element without parent, since it will be auto
-            ## reparenting
+            ## re-parenting
             element = build(None, cell)
+
             from PyQt5.QtWidgets import QLayout
             if isinstance(element, QLayout):
                 container.addLayout(element)
@@ -173,7 +173,7 @@ def build(parent_element, data, cached=None):
         ## could be None when trying to build children
         element = None
     else:
-        raise RuntimeError('Unexpected cell {}'.format(data))
+        raise RuntimeError('Unsupported cell "{}"'.format(data))
     return element
 
 def render(root, cell, forceRecreation=False):
