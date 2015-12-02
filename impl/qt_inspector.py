@@ -25,7 +25,8 @@ def get_default_attach_method(Parent, Child):
         if issubclass(Parent, (QMenuBar, QMenu)):
             method = Parent.addMenu
         else:
-            method = None
+            # FIXME should we allow arbitrary QWidget have a menu as a child?
+            #method = None
             pass
     elif issubclass(Child, QAction):
         method = Parent.addAction
