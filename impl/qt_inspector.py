@@ -31,7 +31,6 @@ def get_default_attach_method(Parent, Child):
     elif issubclass(Child, QAction):
         method = Parent.addAction
     else:
-        method = None
         pass
 
     if method is None:
