@@ -58,6 +58,48 @@ def m(tag, *args):
 
     return cell
 
+def apply_attribute_to(element, key, val):
+    if hasattr(element, _snake_to_camel('set_'+key)):
+        getattr(element, _snake_to_camel('set_'+key))(val)
+    elif key.startswith('on_') and hasattr(element, _snake_to_camel(key[3:])):
+        signal = getattr(element, _snake_to_camel(key[3:]))
+        if callable(val):
+            signal.connect(val)
+        elif isinstance(val, dict):
+            if 'selector' not in val:
+                parts = val['slot'].split('::')
+                selector = parts[0]
+                method = parts[1]
+            else:
+                selector = val['selector']
+                method = val['slot']
+                pass
+
+            if selector.startswith('#'):
+                from impl.query import get_element_by_id
+                target_element = get_element_by_id(selector[1:])
+                if target_element is not None:
+                    signal.connect(getattr(target_element, _snake_to_camel(method)))
+                    pass
+                pass
+            pass
+        else:
+            raise RuntimeError('slot value {} to signal {} is malformed'.format(val, key))
+    elif key.endswith('_on') and hasattr(element, _snake_to_camel(key[:-3])):
+        slot = getattr(element, _snake_to_camel(key[:-3]))
+        val.connect(slot)
+    elif key == 'id':
+        from impl.query import _m_constructed_elements
+        if val in _m_constructed_elements:
+            raise RuntimeError('The element with id {} already exists.'.format(val))
+        else:
+            _m_constructed_elements[val] = element
+            pass
+        pass
+    else:
+        raise RuntimeError('Unexpected attribute {}'.format(key))
+    pass
+
 def build_dict(parent_element, data, cached):
     ## parse tag
     if isinstance(data['tag'][0], str):
@@ -77,49 +119,10 @@ def build_dict(parent_element, data, cached):
 
     ## apply attributes on this element
     for key, val in data.get('attrs',{}).items():
-        if hasattr(element, _snake_to_camel('set_'+key)):
-            getattr(element, _snake_to_camel('set_'+key))(val)
-            pass
-        elif key.startswith('on_') and hasattr(element, _snake_to_camel(key[3:])):
-            signal = getattr(element, _snake_to_camel(key[3:]))
-            if callable(val):
-                signal.connect(val)
-            elif isinstance(val, dict):
-                if 'selector' not in val:
-                    parts = val['slot'].split('::')
-                    selector = parts[0]
-                    method = parts[1]
-                else:
-                    selector = val['selector']
-                    method = val['slot']
-                    pass
-
-                if selector.startswith('#'):
-                    from impl.query import get_element_by_id
-                    target_element = get_element_by_id(selector[1:])
-                    if target_element is not None:
-                        signal.connect(getattr(target_element, _snake_to_camel(method)))
-                        pass
-                    pass
-                pass
-            else:
-                raise RuntimeError('slot value {} to signal {} is malformed'.format(val, key))
-        elif key.endswith('_on') and hasattr(element, _snake_to_camel(key[:-3])):
-            slot = getattr(element, _snake_to_camel(key[:-3]))
-            val.connect(slot)
-        elif key == 'id':
-            from impl.query import _m_constructed_elements
-            if val in _m_constructed_elements:
-                raise RuntimeError('The element with id {} already exists.'.format(val))
-            else:
-                _m_constructed_elements[val] = element
-                pass
-            pass
-        else:
-            raise RuntimeError('Unexpected attribute {}'.format(key))
+        apply_attribute_to(element, key, val)
         continue
 
-    ## build children
+    ## create child elements automatically parenting this element
     children = build(element, data.get('children'), cached)
 
     return element
@@ -145,14 +148,23 @@ def build_list(parent_element, data, attrs, cached):
         container_type = layout
         pass
 
-    ## this layout could be a root layout of parent_element, or a nested one
+    ## create the layout
     if parent_element is not None and parent_element.layout() is None:
+        ## this layout could be a root layout of parent_element
         container = container_type(parent_element)
     else:
+        ## or a nested root layout
         container = container_type()
         pass
 
-    ## iterate on children
+    ## apply attributes to the layout
+    for key, val in attrs.items():
+        if key != 'layout':
+            apply_attribute_to(container, key, val)
+            pass
+        continue
+
+    ## add child items
     for cell in data:
         if isinstance(cell, str):
             getattr(container, _snake_to_camel('add_{}'.format(cell)))()
