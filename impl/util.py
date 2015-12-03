@@ -15,6 +15,7 @@ def forward(*args, **kwargs):
 class _Adder(object):
     def __init__(self, target, *args, **kwargs):
         self.forwarder = forward(*args, **kwargs)
+        self.raw_target = target
         self.target = target
         pass
 

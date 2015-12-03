@@ -188,17 +188,31 @@ def build_list(parent_element, data, cached):
 
     ## add child items
     for i, cell in enumerate(cells):
+        ## create the adder object
         adder = cell if isinstance(cell, impl.util._Adder) else impl.util.add(cell)
 
+        ## get the callback to add
         if isinstance(adder.target, str):
             adder.target = getattr(container, _snake_to_camel('add_{}'.format(adder.target)))
         else:
             adder.target = impl.qt_inspector.get_bound_attach_method(container, build(None, adder.target))
             pass
 
-        if 'columns' in attrs:
-            ## a grid layout: insert position arguments
-            adder.forwarder.args = divmod(i, attrs['columns']) + adder.forwarder.args
+        ## special cares
+        if 'layout' in attrs:
+            if attrs['layout'] in ('grid', 'grid_layout'):
+                if 'columns' in attrs:
+                    ## a grid layout: insert position arguments
+                    adder.forwarder.args = divmod(i, attrs['columns']) + adder.forwarder.args
+                else:
+                    pass
+            elif attrs['layout'] in ('form', 'form_layout'):
+                if adder.raw_target == 'row':
+                    adder.forwarder.args = tuple(x if isinstance(x, str) else build(None, x) for x in adder.forwarder.args)
+                else:
+                    pass
+            else:
+                pass
             pass
 
         adder.apply()
