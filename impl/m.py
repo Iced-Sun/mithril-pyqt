@@ -192,7 +192,7 @@ def build_list(parent_element, data, cached):
             adder.target = impl.qt_inspector.get_bound_attach_method(container, element)
             pass
 
-        ## special cares
+        ## quirks
         if 'layout' in attrs:
             if attrs['layout'] in ('grid', 'grid_layout'):
                 if 'columns' in attrs:
