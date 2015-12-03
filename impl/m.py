@@ -118,7 +118,7 @@ def apply_attribute_to(element, key, val):
         raise RuntimeError('Unexpected attribute {}'.format(key))
     pass
 
-def build_dict(parent_element, data, cached):
+def build_dict(parent, data, cached):
     ## parse tag
     if isinstance(data['tag'][0], str):
         element_type = impl.qt_inspector.find_qt_class(data['tag'][0])
@@ -127,13 +127,13 @@ def build_dict(parent_element, data, cached):
         pass
 
     ## create this element with parent
-    element = element_type(*data['tag'][1:], parent_element)
+    element = element_type(*data['tag'][1:], parent)
 
     ## additional actions to attach the element (because making an child
     ## element in QT is mainly for memory management, and sometimes for
     ## display, e.g., QMenu(parent=QMenuBar) doesn't show the menu in the menu
     ## bar)
-    impl.qt_inspector.apply_attach_method(parent_element, element)
+    impl.qt_inspector.apply_attach_method(parent, element)
 
     ## apply attributes on this element
     for key, val in data.get('attrs',{}).items():
@@ -145,7 +145,21 @@ def build_dict(parent_element, data, cached):
 
     return element
 
-def build_list(parent_element, data, cached):
+def build_list(parent, data, cached):
+    ## transform a plain list to m() object
+    if not isinstance(data, _Contained_cell):
+        container = impl.qt_inspector.suggest_container1(parent, data)
+        return build(parent, m(container, _Contained_cell(data)))
+
+    ## add child items
+    for i, cell in enumerate(data):
+        element = build(None, _make_cell(cell))
+        impl.qt_inspector.get_bound_attach_method(parent, element)()
+        continue
+
+    return None
+
+def build_list1(parent_element, data, cached):
     ## extract the attributes of the list
     if len(data) and isinstance(data[0], dict) and not isinstance(data[0], _Cell_tag):
         attrs = data[0]

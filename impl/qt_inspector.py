@@ -7,6 +7,12 @@ def auto_reparentable(element):
         return False
     pass
 
+def suggest_container1(parent, children):
+    if isinstance(children, list):
+        return 'h_box_layout'
+    elif isinstance(children, tuple):
+        return 'v_box_layout'
+
 def suggest_container(parent, container_type_hint):
     if isinstance(parent, (QMenu, QMenuBar)):
         if container_type_hint is None:
@@ -52,6 +58,8 @@ def get_unbound_attach_method(Parent, Child):
             method = Parent.addWidget
         else:
             method = None
+    elif issubclass(Child, QLayout):
+        pass
     elif issubclass(Child, QMenu):
         if issubclass(Parent, (QMenuBar, QMenu)):
             method = Parent.addMenu
