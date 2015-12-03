@@ -16,6 +16,18 @@ run([
     ('invisible menu & action@widget', m('widget', m('menu', 'Menu', m('action', 'Action')))),
     ('invisible menu & visible action@widget+layout', m('widget', (m('menu', 'Menu', m('action', 'Action')),))),
 
+    ('multiple actions', m('widget', [
+        {
+            'layout': 'grid_layout',
+            'spacing': 20,
+            'menu_bar': m('menu_bar', m('menu', 'Menu', [
+                m('action', 'Action A'),
+                m('action', 'Action B'),
+            ])),
+        },
+    ])),
+
+    #('', m('widget', m('menu', [m('action', 'Action A'), m('action', 'Action B'), 'Action C'])
     #return m('widget', m('menu', [m('action', 'action1'), m('action', 'action2')]))
 
     #('main_window', m('main_window', [label('1'), label('2'), label('3')])),
