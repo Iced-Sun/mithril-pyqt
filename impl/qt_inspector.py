@@ -9,7 +9,10 @@ def find_qt_class(name):
         raise RuntimeError('Tag "{}" is not a supported widget type.'.format(name))
     return
 
-def get_default_attach_method(Parent, Child):
+def get_unbound_attach_method(Parent, Child):
+    """Return an unbound method of Parent that will attach the child to the parent.
+    """
+
     method = lambda *args: None
 
     if Parent is type(None) or Child is type(None):
@@ -39,9 +42,13 @@ def get_default_attach_method(Parent, Child):
 
     return method
 
+def get_bound_attach_method(parent, child):
+    """Return a bound method of type(parent) that binds both parent and child
+    """
+    return lambda *args, **kwargs: get_unbound_attach_method(type(parent), type(child))(parent, child, *args, **kwargs)
+
 def apply_attach_method(parent, child, *args, **kwargs):
-    method = get_default_attach_method(type(parent), type(child))
-    method(parent, child, *args, **kwargs)
+    get_bound_attach_method(parent, child)(*args, **kwargs)
     return
 
 def _get_default_unbound_attach_method(Parent, Child):
