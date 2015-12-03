@@ -168,6 +168,12 @@ def build_list(parent_element, data, cached):
     if parent_element is not None and parent_element.layout() is None:
         ## this layout could be a root layout of parent_element
         container = container_type(parent_element)
+
+        # or we could do
+        '''
+        container = container_type()
+        parent_element.setLayout(container)
+        '''
     else:
         ## or a nested root layout
         container = container_type()
