@@ -11,6 +11,12 @@ class _Cell_tag(object):
 class _Dict_cell(dict, _Cell_tag):
     pass
 
+class _List_cell(list, _Cell_tag):
+    pass
+
+class _Tuple_cell(tuple, _Cell_tag):
+    pass
+
 def _make_cell(obj=None):
     if obj is None:
         obj = {}
@@ -18,6 +24,10 @@ def _make_cell(obj=None):
 
     if isinstance(obj, dict):
         return _Dict_cell(obj)
+    elif isinstance(obj, list):
+        return _List_cell(obj)
+    elif isinstance(obj, tuple):
+        return _tuple_cell(obj)
     else:
         raise RuntimeError('Unsupported cell type {}'.format(obj))
     pass
@@ -70,8 +80,8 @@ def m(tag, *args):
 
 def apply_attribute_to(element, key, val):
     if hasattr(element, _snake_to_camel('set_'+key)):
-        if isinstance(val, dict) and 'tag' in val:
-            ## this is a m() constructed element
+        if isinstance(val, _Cell_tag):
+            ## auto re-parent
             getattr(element, _snake_to_camel('set_'+key))(build(None, val))
         else:
             getattr(element, _snake_to_camel('set_'+key))(val)
@@ -144,7 +154,7 @@ def build_dict(parent_element, data, cached):
 
 def build_list(parent_element, data, cached):
     ## extract the attributes of the list
-    if len(data) and isinstance(data[0], dict) and 'tag' not in data[0]:
+    if len(data) and isinstance(data[0], dict) and not isinstance(data[0], _Cell_tag):
         attrs = data[0]
         cells = data[1:]
     else:
