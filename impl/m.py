@@ -69,7 +69,7 @@ def m(tag, *args):
             raise RuntimeError('malformat tag name: {}'.format(tag[0]))
 
         ## pythonic tag name
-        tag_name = _snake_to_camel(tag[0], capitalize_first=True)
+        tag_name = _snake_to_camel(tag_name, capitalize_first=True)
         pass
 
     ## set tag
