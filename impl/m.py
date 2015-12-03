@@ -213,23 +213,22 @@ def build_list(parent_element, data, cached):
             adder.target = impl.qt_inspector.get_bound_attach_method(container, element)
             pass
 
-        ## quirks
-        if 'layout' in attrs:
-            if attrs['layout'] in ('grid', 'grid_layout'):
-                if 'columns' in attrs:
-                    ## a grid layout: insert position arguments
-                    adder.forwarder.args = divmod(i, attrs['columns']) + adder.forwarder.args
-                else:
-                    pass
-            elif attrs['layout'] in ('form', 'form_layout'):
-                if adder.raw_target == 'row':
-                    adder.forwarder.args = tuple(x if isinstance(x, str) else build(None, x) for x in adder.forwarder.args)
-                else:
-                    pass
+        ## build the element if necessary
+        def _is_cell(x):
+            if isinstance(x, (list, tuple)):
+                return any([isinstance(y, _Cell_tag) for y in x])
             else:
-                pass
+                return isinstance(x, _Cell_tag)
+            pass
+        adder.forwarder.args = tuple(build(None, x) if _is_cell(x) else x for x in adder.forwarder.args)
+
+        ## quirks
+        if attrs.get('layout') in ('grid', 'grid_layout') and 'columns' in attrs:
+            ## a grid layout: insert position arguments
+            adder.forwarder.args = divmod(i, attrs['columns']) + adder.forwarder.args
             pass
 
+        ## fine
         adder.apply()
         continue
 
