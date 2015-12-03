@@ -139,7 +139,7 @@ def build_list(parent_element, data, cached):
             attrs = data[0]
             cells = data[1:]
         else:
-            raise RuntimeError('The first layout element {} is ambiguous.'.format(data[0]))
+            raise RuntimeError('Cannot tell if the first element {} is attributes or an item of the layout.'.format(data[0]))
     else:
         attrs = {}
         cells = data
