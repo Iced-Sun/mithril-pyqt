@@ -184,40 +184,39 @@ def build_list(parent_element, data, cached):
 
     ## add child items
     for i, cell in enumerate(cells):
+        args = ()
+        kwargs = {}
+
         if isinstance(cell, str):
-            getattr(container, _snake_to_camel('add_{}'.format(cell)))()
-        elif isinstance(cell, dict) and 'tag' not in cell:
-            if len(cell) != 1:
-                raise RuntimeError('A dict item inside a layout must have exact one key. {}'.format(cell))
-            for key, val in cell.items():
-                bound_method = getattr(container, _snake_to_camel('add_{}'.format(key)))
-
-                args = list(val) if isinstance(val, tuple) else [val]
-
-                kwargs = {}
-                if len(args) and isinstance(args[-1], dict) and 'tag' not in args[-1]:
-                    kwargs = args.pop()
-                    pass
-
-                if key == 'widget' and 'tag' in args[0]:
-                    args[0] = build(None, args[0])
-                    pass
-
-                bound_method(*args, **kwargs)
-                continue
-        else:
-            ## create the element without parent, since it will be auto
-            ## re-parenting
-            element = build(None, cell)
-
-            ## attach the element to the container
-            if 'columns' in attrs:
-                ## a grid layout
-                impl.qt_inspector.apply_attach_method(container, element, *divmod(i, attrs['columns']))
+            ## no arguments are provided
+            bound_method = getattr(container, _snake_to_camel('add_{}'.format(cell)))
+        elif isinstance(cell, dict):
+            if 'tag' in cell:
+                bound_method = impl.qt_inspector.get_bound_attach_method(container, build(None, cell))
+            elif 'widget' in cell:
+                args = cell.pop('widget')
+                args = args if isinstance(args, tuple) else (args,)
+                bound_method = impl.qt_inspector.get_bound_attach_method(container, build(None, args[0]))
+                args = args[1:]
+                kwargs = cell
             else:
-                impl.qt_inspector.apply_attach_method(container, element)
+                if len(cell) != 1:
+                    raise RuntimeError('A non widget dict item inside a layout must have exact one key. {}'.format(cell))
+                else:
+                    key, val = list(cell.items())[0]
+                    bound_method = getattr(container, _snake_to_camel('add_{}'.format(key)))
+                    args = val if isinstance(val, tuple) else (val,)
                 pass
+        else:
+            bound_method = impl.qt_inspector.get_bound_attach_method(container, build(None, cell))
             pass
+
+        if 'columns' in attrs:
+            ## a grid layout: insert position arguments
+            args = divmod(i, attrs['columns']) + args
+            pass
+
+        bound_method(*args, **kwargs)
         continue
 
     return container
