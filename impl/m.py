@@ -8,13 +8,7 @@ def _snake_to_camel(name, capitalize_first=False):
 class _Cell_tag(object):
     pass
 
-class _Dict_cell(dict, _Cell_tag):
-    pass
-
-class _List_cell(list, _Cell_tag):
-    pass
-
-class _Tuple_cell(tuple, _Cell_tag):
+class _Contained_cell(list, _Cell_tag):
     pass
 
 def _make_cell(obj=None):
@@ -22,12 +16,12 @@ def _make_cell(obj=None):
         obj = {}
         pass
 
-    if isinstance(obj, dict):
-        return _Dict_cell(obj)
-    elif isinstance(obj, list):
-        return _List_cell(obj)
-    elif isinstance(obj, tuple):
-        return _Tuple_cell(obj)
+    if isinstance(obj, _Contained_cell):
+        return obj
+    elif isinstance(obj, (dict, list, tuple)):
+        class _Tagged_cell(type(obj), _Cell_tag):
+            pass
+        return _Tagged_cell(obj)
     else:
         raise RuntimeError('Unsupported cell type {}'.format(obj))
     pass
@@ -248,12 +242,15 @@ def build(parent_element, data, cached=None):
     if not data:
         ## could be None when trying to build children
         element = None
-    elif isinstance(data, _Dict_cell):
-        element = build_dict(parent_element, data, cached)
-    elif isinstance(data, (_List_cell, _Tuple_cell)):
-        element = build_list(parent_element, data, cached)
+    elif isinstance(data, _Cell_tag):
+        if isinstance(data, dict):
+            element = build_dict(parent_element, data, cached)
+        elif isinstance(data, (list, tuple)):
+            element = build_list(parent_element, data, cached)
+        else:
+            raise RuntimeError('Unsupported cell "{}: {}"'.format(type(data), data))
     else:
-        raise RuntimeError('Unsupported cell "{}"'.format(data))
+        raise RuntimeError('Unsupported cell "{}: {}"'.format(type(data), data))
     return element
 
 def render(root, cell, forceRecreation=False):
