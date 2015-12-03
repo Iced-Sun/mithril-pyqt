@@ -5,25 +5,37 @@ def _snake_to_camel(name, capitalize_first=False):
     components = name.split('_')
     return ''.join(x.capitalize() for x in components) if capitalize_first else components[0] + ''.join(x.capitalize() for x in components[1:])
 
+class _Cell_tag(object):
+    pass
+
+class _Dict_cell(dict, _Cell_tag):
+    pass
+
+def _make_cell(obj=None):
+    if obj is None:
+        obj = {}
+        pass
+
+    if isinstance(obj, dict):
+        return _Dict_cell(obj)
+    else:
+        raise RuntimeError('Unsupported cell type {}'.format(obj))
+    pass
+
 def m(tag, *args):
-    cell = {}
+    cell = _make_cell()
 
     ## parse args in reverse order
     # for list::pop()
     args = list(args)
 
-    ## attached children
-    # assume it's a list, a tuple, or a dict with a 'tag' key
-    if args and (
-            isinstance(args[-1], (list, tuple))
-            or (isinstance(args[-1], dict) and 'tag' in args[-1]
-            )):
-        cell['children'] = args.pop()
+    ## attached children: a list, tuple, or _Cell
+    if args and isinstance(args[-1], (list, tuple, _Cell_tag)):
+        cell['children'] = _make_cell(args.pop())
         pass
 
-    ## attributes for the tag
-    # assume it's a dict without 'tag' key
-    if args and isinstance(args[-1], dict) and 'tag' not in args[-1]:
+    ## attributes for the tag: a dict
+    if args and isinstance(args[-1], dict):
         cell['attrs'] = args.pop()
         pass
 
