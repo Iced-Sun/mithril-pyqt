@@ -1,6 +1,5 @@
 from config import *
 
-## TODO span and optional arguments support
 run([
     ('G41', m('widget', [
         {
