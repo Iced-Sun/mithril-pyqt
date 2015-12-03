@@ -155,7 +155,7 @@ def build_list(parent_element, data, cached):
     ## extract the attributes of the list
     if len(data) and isinstance(data[0], dict) and not isinstance(data[0], _Cell_tag):
         attrs = data[0]
-        cells = data[1:]
+        cells = _make_cell(data[1:])
     else:
         attrs = {}
         cells = data
@@ -204,6 +204,7 @@ def build_list(parent_element, data, cached):
         if isinstance(adder.target, str):
             adder.target = getattr(container, _snake_to_camel('add_{}'.format(adder.target)))
         else:
+            adder.target = _make_cell(adder.target)
             if impl.qt_inspector.auto_reparentable(container):
                 element = build(None, adder.target)
             else:
@@ -220,7 +221,7 @@ def build_list(parent_element, data, cached):
             else:
                 return isinstance(x, _Cell_tag)
             pass
-        adder.forwarder.args = tuple(build(None, x) if _is_cell(x) else x for x in adder.forwarder.args)
+        adder.forwarder.args = tuple(build(None, _make_cell(x)) if _is_cell(x) else x for x in adder.forwarder.args)
 
         ## quirks
         if attrs.get('layout') in ('grid', 'grid_layout') and 'columns' in attrs:
@@ -236,13 +237,13 @@ def build_list(parent_element, data, cached):
 
 def build(parent_element, data, cached=None):
     ## dispatch on data type
-    if isinstance(data, dict):
-        element = build_dict(parent_element, data, cached)
-    elif isinstance(data, (list, tuple)):
-        element = build_list(parent_element, data, cached)
-    elif data is None:
+    if not data:
         ## could be None when trying to build children
         element = None
+    elif isinstance(data, _Dict_cell):
+        element = build_dict(parent_element, data, cached)
+    elif isinstance(data, (_List_cell, _Tuple_cell)):
+        element = build_list(parent_element, data, cached)
     else:
         raise RuntimeError('Unsupported cell "{}"'.format(data))
     return element
