@@ -146,14 +146,17 @@ def build_list(parent_element, data, cached):
         pass
 
     ## pick a layout
-    if 'layout' in attrs:
-        layout = attrs['layout']
-    elif isinstance(cells, list):
-        layout = 'h_box'
-    elif isinstance(cells, tuple):
-        layout = 'v_box'
-    else:
-        raise RuntimeError('Cannot determine the layout type')
+    layout = attrs.get('layout', True)
+
+    # TODO layout=None to support no layout manager?
+    if layout == True:
+        if isinstance(cells, list):
+            layout = 'h_box'
+        elif isinstance(cells, tuple):
+            layout = 'v_box'
+        else:
+            raise RuntimeError('Cannot automatically determine the layout type')
+        pass
 
     ## get the layout factory
     if isinstance(layout, str):
