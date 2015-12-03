@@ -135,7 +135,7 @@ def build_dict(parent_element, data, cached):
 def build_list(parent_element, data, cached):
     ## try the best to extract attributes of the list
     if len(data) and isinstance(data[0], dict) and 'tag' not in data[0] and 'widget' not in data[0]:
-        if len(data[0]) > 1 or 'layout' in data[0]:
+        if len(data[0]) != 1 or 'layout' in data[0]:
             attrs = data[0]
             cells = data[1:]
         else:
