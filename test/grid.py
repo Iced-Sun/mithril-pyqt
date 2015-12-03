@@ -36,10 +36,19 @@ run([
             'layout': 'grid',
             'columns': 2
         },
-        [label('1'), label('1')],
-        (label('2'), label('2')),
-        label('3'),
-        label('4'),
+        [label('1'), label('1')], (label('2'), label('2')),
+        label('3'),               label('4'),
+    ])),
+
+    ('G+nest(args)', m('widget', [
+        {
+            'layout': 'grid',
+            'columns': 3
+        },
+
+        m.add([label('1'), label('1')], 1, 2),  None,       label('3'),
+        m.add((label('4'), label('4')), 2, 1),  label('5'), label('6'),
+        None,                                   label('8'), label('9')
     ])),
 
     ('G33+args', m('widget', [
