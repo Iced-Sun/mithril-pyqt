@@ -164,20 +164,8 @@ def build_list(parent_element, data, cached):
         container_type = layout
         pass
 
-    ## create the layout
-    if parent_element is not None and parent_element.layout() is None:
-        ## this layout could be a root layout of parent_element
-        container = container_type(parent_element)
-
-        # or we could do
-        '''
-        container = container_type()
-        parent_element.setLayout(container)
-        '''
-    else:
-        ## or a nested root layout
-        container = container_type()
-        pass
+    ## create the container
+    container = impl.qt_inspector.suggest_container(parent_element, container_type)
 
     ## apply attributes to the layout
     for key, val in attrs.items():

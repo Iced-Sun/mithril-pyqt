@@ -1,5 +1,16 @@
 from PyQt5.QtWidgets import *
 
+def suggest_container(parent, layout_type):
+    if isinstance(parent, (QMenu, QMenuBar)):
+        return parent
+    else:
+        if parent is not None and parent.layout() is None:
+            return layout_type(parent)
+        else:
+            return layout_type()
+        pass
+    pass
+
 def find_qt_class(name):
     name_ = name if name.startswith('Q') else 'Q' + name
 
