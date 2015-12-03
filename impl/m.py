@@ -205,6 +205,14 @@ def build_list(parent_element, data, cached):
             adder.target = getattr(container, _snake_to_camel('add_{}'.format(adder.target)))
         else:
             adder.target = _make_cell(adder.target)
+
+            ## quirk on QActionGroup
+            if isinstance(adder.target, (list,tuple)) and impl.qt_inspector.suggest_container(parent_element, None) == 'action_group':
+                ## TODO can we/should we apply the same mechanism to layout?
+                adder.target = m('action_group', adder.target)
+                pass
+
+            ## build child element
             if impl.qt_inspector.auto_reparentable(container):
                 element = build(None, adder.target)
             else:

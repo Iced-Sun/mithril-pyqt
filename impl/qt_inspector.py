@@ -7,16 +7,24 @@ def auto_reparentable(element):
         return False
     pass
 
-def suggest_container(parent, layout_type):
-    if layout_type is None:
-        return parent if isinstance(parent, QWidget) else parent.parentWidget()
-    elif isinstance(parent, (QMenu, QMenuBar)):
+def suggest_container(parent, container_type_hint):
+    if isinstance(parent, (QMenu, QMenuBar)):
+        if container_type_hint is None:
+            #return QActionGroup(parent)
+            return 'action_group'
+        else:
+            return parent
+    elif isinstance(parent, QActionGroup):
         return parent
     else:
-        if parent is not None and parent.layout() is None:
-            return layout_type(parent)
+        if container_type_hint is None:
+            return parent if isinstance(parent, QWidget) else parent.parentWidget()
         else:
-            return layout_type()
+            if parent is not None and parent.layout() is None:
+                return container_type_hint(parent)
+            else:
+                return container_type_hint()
+            pass
         pass
     pass
 
@@ -47,10 +55,17 @@ def get_unbound_attach_method(Parent, Child):
     elif issubclass(Child, QMenu):
         if issubclass(Parent, (QMenuBar, QMenu)):
             method = Parent.addMenu
-            pass
+        else:
+            method = None
     elif issubclass(Child, QAction):
         method = Parent.addAction
+    elif issubclass(Child, QActionGroup):
+        method = lambda parent, child: Parent.addActions(parent, child.actions())
+    elif issubclass(Parent, QWidget) and issubclass(Child, QWidget):
+        ## already attached, but without a layout manager
+        pass
     else:
+        method = None
         pass
 
     if method is None:
