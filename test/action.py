@@ -18,11 +18,25 @@ run([
 
     ('multiple actions', m('widget', [
         {
-            'layout': 'grid_layout',
-            'spacing': 20,
             'menu_bar': m('menu_bar', m('menu', 'Menu', [
                 m('action', 'Action A'),
                 m('action', 'Action B'),
+                'separator',
+                m.add('action', 'Action C'),
+                m.add('action', 'Action D'),
+                m.add('section', 'Section'),
+                m('action', 'Action E'),
+                m('action', 'Action F'),
+            ])),
+        },
+    ])),
+
+    ('nested menu', m('widget', [
+        {
+            'menu_bar': m('menu_bar', m('menu', 'Menu', [
+                m('action', 'Action A'),
+                'separator',
+                m.add('menu', m('menu', 'Sub-menu'))
             ])),
         },
     ])),
