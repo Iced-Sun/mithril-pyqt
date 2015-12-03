@@ -47,10 +47,10 @@ run([
             'layout': 'grid',
             'columns': 3
         },
-        
-        {'widget': (label('1'), 2, 2)}, None, label('3'),
-        None,       None, label('6'),
-        label('7'), None, None
+
+        m.add(label('1'), 2, 2), None,                  label('3'),
+        None,                    None,                  label('6'),
+        label('7'),              m.add(label('8'),1,2), None
     ])),
 ])
 

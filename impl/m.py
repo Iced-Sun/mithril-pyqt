@@ -1,4 +1,5 @@
 import impl.qt_inspector
+import impl.util
 
 def _snake_to_camel(name, capitalize_first=False):
     components = name.split('_')
@@ -133,13 +134,10 @@ def build_dict(parent_element, data, cached):
     return element
 
 def build_list(parent_element, data, cached):
-    ## try the best to extract attributes of the list
-    if len(data) and isinstance(data[0], dict) and 'tag' not in data[0] and 'widget' not in data[0]:
-        if len(data[0]) != 1 or 'layout' in data[0]:
-            attrs = data[0]
-            cells = data[1:]
-        else:
-            raise RuntimeError('Cannot tell if the first element {} is attributes or an item of the layout.'.format(data[0]))
+    ## extract the attributes of the list
+    if len(data) and isinstance(data[0], dict) and 'tag' not in data[0]:
+        attrs = data[0]
+        cells = data[1:]
     else:
         attrs = {}
         cells = data
@@ -184,39 +182,20 @@ def build_list(parent_element, data, cached):
 
     ## add child items
     for i, cell in enumerate(cells):
-        args = ()
-        kwargs = {}
+        adder = cell if isinstance(cell, impl.util._Adder) else impl.util.add(cell)
 
-        if isinstance(cell, str):
-            ## no arguments are provided
-            bound_method = getattr(container, _snake_to_camel('add_{}'.format(cell)))
-        elif isinstance(cell, dict):
-            if 'tag' in cell:
-                bound_method = impl.qt_inspector.get_bound_attach_method(container, build(None, cell))
-            elif 'widget' in cell:
-                args = cell.pop('widget')
-                args = args if isinstance(args, tuple) else (args,)
-                bound_method = impl.qt_inspector.get_bound_attach_method(container, build(None, args[0]))
-                args = args[1:]
-                kwargs = cell
-            else:
-                if len(cell) != 1:
-                    raise RuntimeError('A non widget dict item inside a layout must have exact one key. {}'.format(cell))
-                else:
-                    key, val = list(cell.items())[0]
-                    bound_method = getattr(container, _snake_to_camel('add_{}'.format(key)))
-                    args = val if isinstance(val, tuple) else (val,)
-                pass
+        if isinstance(adder.target, str):
+            adder.target = getattr(container, _snake_to_camel('add_{}'.format(adder.target)))
         else:
-            bound_method = impl.qt_inspector.get_bound_attach_method(container, build(None, cell))
+            adder.target = impl.qt_inspector.get_bound_attach_method(container, build(None, adder.target))
             pass
 
         if 'columns' in attrs:
             ## a grid layout: insert position arguments
-            args = divmod(i, attrs['columns']) + args
+            adder.forwarder.args = divmod(i, attrs['columns']) + adder.forwarder.args
             pass
 
-        bound_method(*args, **kwargs)
+        adder.apply()
         continue
 
     return container
