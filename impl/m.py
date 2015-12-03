@@ -183,7 +183,13 @@ def build_list(parent_element, data, cached):
         if isinstance(adder.target, str):
             adder.target = getattr(container, _snake_to_camel('add_{}'.format(adder.target)))
         else:
-            adder.target = impl.qt_inspector.get_bound_attach_method(container, build(None, adder.target))
+            if impl.qt_inspector.auto_reparentable(container):
+                element = build(None, adder.target)
+            else:
+                element = build(container, adder.target)
+                pass
+
+            adder.target = impl.qt_inspector.get_bound_attach_method(container, element)
             pass
 
         ## special cares

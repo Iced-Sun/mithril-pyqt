@@ -1,5 +1,12 @@
 from PyQt5.QtWidgets import *
 
+def auto_reparentable(element):
+    if isinstance(element, QLayout):
+        return True
+    else:
+        return False
+    pass
+
 def suggest_container(parent, layout_type):
     if isinstance(parent, (QMenu, QMenuBar)):
         return parent
