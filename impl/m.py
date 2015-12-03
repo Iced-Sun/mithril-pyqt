@@ -27,7 +27,7 @@ def _make_cell(obj=None):
     elif isinstance(obj, list):
         return _List_cell(obj)
     elif isinstance(obj, tuple):
-        return _tuple_cell(obj)
+        return _Tuple_cell(obj)
     else:
         raise RuntimeError('Unsupported cell type {}'.format(obj))
     pass
@@ -70,7 +70,6 @@ def m(tag, *args):
 
         ## pythonic tag name
         tag_name = _snake_to_camel(tag[0], capitalize_first=True)
-
         pass
 
     ## set tag
@@ -165,7 +164,7 @@ def build_list(parent_element, data, cached):
     ## pick a layout
     layout = attrs.get('layout', True)
 
-    # TODO layout=None to support no layout manager?
+    ## select a default layout by the collection type
     if layout == True:
         if isinstance(cells, list):
             layout = 'h_box'
@@ -179,6 +178,8 @@ def build_list(parent_element, data, cached):
     if isinstance(layout, str):
         layout = layout if layout.endswith('_layout') else layout+'_layout'
         container_type = impl.qt_inspector.find_qt_class('Q' + _snake_to_camel(layout, capitalize_first=True))
+    elif layout is None:
+        container_type = None
     else:
         container_type = layout
         pass
@@ -188,6 +189,7 @@ def build_list(parent_element, data, cached):
 
     ## apply attributes to the layout
     for key, val in attrs.items():
+        ## exclude custom attributes
         if key not in ('layout', 'columns'):
             apply_attribute_to(container, key, val)
             pass

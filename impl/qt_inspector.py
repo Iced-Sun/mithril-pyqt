@@ -8,7 +8,9 @@ def auto_reparentable(element):
     pass
 
 def suggest_container(parent, layout_type):
-    if isinstance(parent, (QMenu, QMenuBar)):
+    if layout_type is None:
+        return parent if isinstance(parent, QWidget) else parent.parentWidget()
+    elif isinstance(parent, (QMenu, QMenuBar)):
         return parent
     else:
         if parent is not None and parent.layout() is None:

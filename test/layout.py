@@ -3,6 +3,8 @@ from config import *
 from PyQt5.QtCore import Qt
 
 run([
+    ('No layout', m('widget', [{'layout': None}, label('1'), label('  2')])),
+
     ('H', m('Widget', [label('1'), label('2'), label('3')])),
     ('H+item', m('Widget', [label('1'), 'stretch', label('2'), label('3')])),
     ('H+item(arg)', m('Widget', ['stretch', label('1'), m.add('spacing', 80), label('2'), label('3')])),
