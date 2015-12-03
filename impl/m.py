@@ -29,33 +29,30 @@ def m(tag, *args):
 
     ## extract tag and its arguments
     if not isinstance(tag, tuple):
-        tag = [tag]
-    else:
-        tag = list(tag)
+        tag = (tag,)
         pass
 
     ## parse tag string
+    tag_name = tag[0]
     if isinstance(tag[0], str):
-        ## pythonic tag name
-        tag[0] = _snake_to_camel(tag[0], capitalize_first=True)
-
         ## extract tag id
         splitted = tag[0].split('#')
         if len(splitted) == 2:
-            tag[0] = splitted[0]
+            tag_name = splitted[0]
             cell['attrs'] = cell.get('attrs', {})
             cell['attrs']['id'] = splitted[1]
         elif len(splitted) == 1:
             pass
         else:
             raise RuntimeError('malformat tag name: {}'.format(tag[0]))
+
+        ## pythonic tag name
+        tag_name = _snake_to_camel(tag[0], capitalize_first=True)
+
         pass
 
     ## set tag
-    cell['tag'] = tag
-
-    ## forward rest arguments to tag
-    cell['tag'] += args
+    cell['tag'] = (tag_name,) + tag[1:] + tuple(args)
 
     return cell
 
