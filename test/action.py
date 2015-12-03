@@ -1,6 +1,10 @@
 from config import *
 
 run([
+    ('invisible action@widget', m('widget', m('action', 'Action'))),
+    ('invisible menu & action@widget', m('widget', m('menu', 'Menu', m('action', 'Action')))),
+    ('invisible menu & visible action@widget+layout', m('widget', (m('menu', 'Menu', m('action', 'Action')),))),
+
     ('menubar@widget', m('widget', [m('menu_bar', m('menu', 'Menu', m('action', 'Action'))), label('1'), label('2')])),
 
     ('menubar in layout@widget', m('widget', [
@@ -12,21 +16,17 @@ run([
         label('1'), label('2')
     ])),
 
-    ('invisible action@widget', m('widget', m('action', 'Action'))),
-    ('invisible menu & action@widget', m('widget', m('menu', 'Menu', m('action', 'Action')))),
-    ('invisible menu & visible action@widget+layout', m('widget', (m('menu', 'Menu', m('action', 'Action')),))),
-
     ('multiple actions', m('widget', [
         {
             'menu_bar': m('menu_bar', m('menu', 'Menu', [
-                m('action', 'Action A'),
-                m('action', 'Action B'),
+                m('action', 'Auto A'),
+                m('action', 'Auto B'),
                 'separator',
-                m.add('action', 'Action C'),
-                m.add('action', 'Action D'),
+                m.add('action', 'Adder C'),
+                m.add('action', 'Adder D'),
                 m.add('section', 'Section'),
-                m('action', 'Action E'),
-                m('action', 'Action F'),
+                m('action', 'Auto E'),
+                m('action', 'Auto F'),
             ])),
         },
     ])),
@@ -34,12 +34,21 @@ run([
     ('nested menu', m('widget', [
         {
             'menu_bar': m('menu_bar', m('menu', 'Menu', [
-                m('action', 'Action A'),
+                m('action', 'Auto A'),
                 'separator',
-                m.add('menu', m('menu', 'Sub-menu'))
+                m.add('menu', m('menu', 'Adder menu A', m('action', 'Auto B'))),
+                m.add('menu', 'Adder menu B'),
+                ## FIXME should support this?
+                #m('menu', 'Auto menu', m.add('action', 'Auto C')),
+                m('menu', 'Auto menu', m('action', 'Auto C')),
+
+                m('menu', 'Auto menu with multiple actions', [m('action', 'Auto D'), m('action', 'Auto E')]),
             ])),
         },
     ])),
+
+    ('menu with action group', m('widget', [
+    ]))
 
     #('', m('widget', m('menu', [m('action', 'Action A'), m('action', 'Action B'), 'Action C'])
     #return m('widget', m('menu', [m('action', 'action1'), m('action', 'action2')]))
