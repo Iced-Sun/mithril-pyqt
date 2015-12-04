@@ -5,6 +5,9 @@ class _Cell_tag(object):
     pass
 
 class _Contained_cell(list, _Cell_tag):
+    def __init__(self, meta_attrs, *args):
+        super().__init__(*args)
+        self.meta_attrs = meta_attrs
     pass
 
 def _make_cell(obj=None):
@@ -159,12 +162,8 @@ def build_list(parent, data, cached):
         ## get a container tag or object
         container = impl.qt_inspector.suggest_container(parent, data, meta_attrs.get('layout', True))
 
-        ## mark the data as with a container
-        cells = _Contained_cell(data)
-
-        ## FIXME hackish work-around to keep the custom attributes for later
-        ## usage when inserting children
-        cells.meta_attrs = meta_attrs
+        ## mark the data as with a container, and keep the meta_attrs
+        cells = _Contained_cell(meta_attrs, data)
 
         ## build the container and its children
         if isinstance(container, (str,type)):
