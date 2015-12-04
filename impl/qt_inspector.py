@@ -2,13 +2,6 @@ import impl.util
 
 from PyQt5.QtWidgets import *
 
-def auto_reparentable(element):
-    if isinstance(element, QLayout):
-        return True
-    else:
-        return False
-    pass
-
 def suggest_parent(parent_hint=None):
     if isinstance(parent_hint, QLayout):
         ## auto re-parent, need and should not set the parent
@@ -38,27 +31,6 @@ def suggest_container(parent, children, container_hint=True):
         return container_hint
     else:
         raise RuntimeError('Does not know how to handle the container_hint "{}"'.format(container_hint))
-
-def suggest_container1(parent, container_type_hint):
-    if isinstance(parent, (QMenu, QMenuBar)):
-        if container_type_hint is None:
-            #return QActionGroup(parent)
-            return 'action_group'
-        else:
-            return parent
-    elif isinstance(parent, QActionGroup):
-        return parent
-    else:
-        if container_type_hint is None:
-            return parent if isinstance(parent, QWidget) else parent.parentWidget()
-        else:
-            if parent is not None and parent.layout() is None:
-                return container_type_hint(parent)
-            else:
-                return container_type_hint()
-            pass
-        pass
-    pass
 
 def find_qt_class(name):
     name_ = name if name.startswith('Q') else 'Q' + name
