@@ -13,12 +13,14 @@ def suggest_parent(parent_hint=None):
 def suggest_container(parent, children, container_hint=True):
     if container_hint == True:
         ## auto guess
-        if isinstance(children, list):
+        if isinstance(parent, QMenu):
+            return parent
+        elif isinstance(children, list):
             return 'h_box_layout'
         elif isinstance(children, tuple):
             return 'v_box_layout'
         else:
-            raise RuntimeError('Does not know how to assign a container for children "{}"'.format(children))
+            raise RuntimeError('Does not know how to assign a container for parent "{}" and children "{}"'.format(parent, children))
     elif container_hint is None:
         ## don't need a container
         return parent
