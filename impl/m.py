@@ -139,19 +139,24 @@ def build_dict(parent, data, cached):
     ## create this element with parent
     element = element_type(*data['tag'][1:], parent)
 
-    ## additional actions to attach the element (because making an child
-    ## element in QT is mainly for memory management, and sometimes for
-    ## display, e.g., QMenu(parent=QMenuBar) doesn't show the menu in the menu
-    ## bar)
-    impl.qt_inspector.apply_attach_method(parent, element)
-
     ## apply attributes on this element
     for key, val in data.get('attrs',{}).items():
         apply_attribute_to(element, key, val)
         continue
 
     ## create child elements automatically parenting this element
-    children = build(element, data.get('children'), cached)
+    if 'children' in data:
+        build(element, data['children'], cached)
+        pass
+
+    ## additional actions to attach the element (because making an child
+    ## element in QT is mainly for memory management, and sometimes for
+    ## display, e.g., QMenu(parent=QMenuBar) doesn't show the menu in the menu
+    ## bar)
+    ##
+    ## BEWARE must be after the children creation 'cause it is possible that
+    ## the children are actually attached to parent (e.g., QActionGroup)
+    impl.qt_inspector.apply_attach_method(parent, element)
 
     return element
 
@@ -227,6 +232,7 @@ def build(parent_element, data, cached=None):
             raise RuntimeError('Unsupported cell "{}: {}"'.format(type(data), data))
     else:
         raise RuntimeError('Unsupported cell "{}: {}"'.format(type(data), data))
+
     return element
 
 def render(root, cell, forceRecreation=False):
