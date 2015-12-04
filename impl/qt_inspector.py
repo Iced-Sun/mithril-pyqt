@@ -12,6 +12,14 @@ def suggest_container1(parent, children):
         return 'h_box_layout'
     elif isinstance(children, tuple):
         return 'v_box_layout'
+def suggest_parent(parent_hint=None):
+    if isinstance(parent_hint, QLayout):
+        ## auto re-parent, need and should not set the parent
+        return None
+    else:
+        return parent_hint
+    pass
+
 
 def suggest_container(parent, container_type_hint):
     if isinstance(parent, (QMenu, QMenuBar)):
