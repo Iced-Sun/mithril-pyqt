@@ -158,10 +158,12 @@ def build_list(parent, data, cached):
         ## get a container tag or object
         container = impl.qt_inspector.suggest_container(parent, data, layout)
 
-        if isinstance(container, str):
+        if isinstance(container, (str,type)):
+            ## returned container is a tag for m(), which means an intermediate
+            ## element is required as a container
             container = build(parent, m(container, attrs, _Contained_cell(data)))
         else:
-            ## no container in need
+            ## no intermediate container in need
             container = build(parent, _Contained_cell(data))
             pass
         return container
