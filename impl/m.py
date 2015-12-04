@@ -1,10 +1,6 @@
 import impl.qt_inspector
 import impl.util
 
-def _snake_to_camel(name, capitalize_first=False):
-    components = name.split('_')
-    return ''.join(x.capitalize() for x in components) if capitalize_first else components[0] + ''.join(x.capitalize() for x in components[1:])
-
 class _Cell_tag(object):
     pass
 
@@ -63,7 +59,7 @@ def m(tag, *args):
             raise RuntimeError('malformat tag name: {}'.format(tag[0]))
 
         ## pythonic tag name
-        tag_name = _snake_to_camel(tag_name, capitalize_first=True)
+        tag_name = impl.util.snake_to_camel(tag_name, capitalize_first=True)
         pass
 
     ## set tag
@@ -72,15 +68,15 @@ def m(tag, *args):
     return cell
 
 def apply_attribute_to(element, key, val):
-    if hasattr(element, _snake_to_camel('set_'+key)):
+    if hasattr(element, impl.util.snake_to_camel('set_'+key)):
         if isinstance(val, _Cell_tag):
             ## auto re-parent
-            getattr(element, _snake_to_camel('set_'+key))(build(None, val))
+            getattr(element, impl.util.snake_to_camel('set_'+key))(build(None, val))
         else:
-            getattr(element, _snake_to_camel('set_'+key))(val)
+            getattr(element, impl.util.snake_to_camel('set_'+key))(val)
             pass
-    elif key.startswith('on_') and hasattr(element, _snake_to_camel(key[3:])):
-        signal = getattr(element, _snake_to_camel(key[3:]))
+    elif key.startswith('on_') and hasattr(element, impl.util.snake_to_camel(key[3:])):
+        signal = getattr(element, impl.util.snake_to_camel(key[3:]))
         if callable(val):
             signal.connect(val)
         elif isinstance(val, dict):
@@ -97,14 +93,14 @@ def apply_attribute_to(element, key, val):
                 from impl.query import get_element_by_id
                 target_element = get_element_by_id(selector[1:])
                 if target_element is not None:
-                    signal.connect(getattr(target_element, _snake_to_camel(method)))
+                    signal.connect(getattr(target_element, impl.util.snake_to_camel(method)))
                     pass
                 pass
             pass
         else:
             raise RuntimeError('slot value {} to signal {} is malformed'.format(val, key))
-    elif key.endswith('_on') and hasattr(element, _snake_to_camel(key[:-3])):
-        slot = getattr(element, _snake_to_camel(key[:-3]))
+    elif key.endswith('_on') and hasattr(element, impl.util.snake_to_camel(key[:-3])):
+        slot = getattr(element, impl.util.snake_to_camel(key[:-3]))
         val.connect(slot)
     elif key == 'id':
         from impl.query import _m_constructed_elements
@@ -177,7 +173,7 @@ def build_list(parent, data, cached):
 
         ## get the callback to add
         if isinstance(adder.target, str):
-            adder.target = getattr(parent, _snake_to_camel('add_{}'.format(adder.target)))
+            adder.target = getattr(parent, impl.util.snake_to_camel('add_{}'.format(adder.target)))
         else:
             element = build(impl.qt_inspector.suggest_parent(parent), _make_cell(adder.target))
             adder.target = impl.qt_inspector.get_bound_attach_method(parent, element)
@@ -214,7 +210,7 @@ def build_list1(parent_element, data, cached):
     ## get the layout factory
     if isinstance(layout, str):
         layout = layout if layout.endswith('_layout') else layout+'_layout'
-        container_type = impl.qt_inspector.find_qt_class('Q' + _snake_to_camel(layout, capitalize_first=True))
+        container_type = impl.qt_inspector.find_qt_class('Q' + impl.util.snake_to_camel(layout, capitalize_first=True))
     elif layout is None:
         container_type = None
     else:
@@ -239,7 +235,7 @@ def build_list1(parent_element, data, cached):
 
         ## get the callback to add
         if isinstance(adder.target, str):
-            adder.target = getattr(container, _snake_to_camel('add_{}'.format(adder.target)))
+            adder.target = getattr(container, impl.util.snake_to_camel('add_{}'.format(adder.target)))
         else:
             adder.target = _make_cell(adder.target)
 

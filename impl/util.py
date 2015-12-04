@@ -1,3 +1,7 @@
+def snake_to_camel(name, capitalize_first=False):
+    components = name.split('_')
+    return ''.join(x.capitalize() for x in components) if capitalize_first else components[0] + ''.join(x.capitalize() for x in components[1:])
+
 class _Forwarder(object):
     def __init__(self, *args, **kwargs):
         self.args = args
