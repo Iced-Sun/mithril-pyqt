@@ -63,6 +63,10 @@ def get_unbound_attach_method(Parent, Child):
     elif issubclass(Child, QMenu):
         if issubclass(Parent, (QMenuBar, QMenu)):
             method = Parent.addMenu
+        elif issubclass(Parent, QWidget):
+            ## FIMXE should warn here: the menu is invisibly attached to the
+            ## parent
+            pass
         else:
             method = None
     elif issubclass(Child, QAction):
