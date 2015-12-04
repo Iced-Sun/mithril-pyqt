@@ -172,7 +172,7 @@ def build_list(parent, data, cached):
 
     ## or the data have the parent as the container, hence add child items
     for i, cell in enumerate(data):
-        element = build(None, _make_cell(cell))
+        element = build(impl.qt_inspector.suggest_parent(parent), _make_cell(cell))
         impl.qt_inspector.get_bound_attach_method(parent, element)()
         continue
 
