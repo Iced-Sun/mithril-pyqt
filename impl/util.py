@@ -22,6 +22,8 @@ class _Adder(object):
     def apply(self):
         return self.forwarder.apply(self.target)
 
+    def __repr__(self):
+        return '{}, {}, {}'.format(self.target, self.forwarder.args, self.forwarder.kwargs)
     pass
 
 def add(target, *args, **kwargs):
