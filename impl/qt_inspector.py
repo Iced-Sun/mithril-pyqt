@@ -26,6 +26,8 @@ def suggest_container(parent, children, container_hint=True):
             raise RuntimeError('Does not know how to assign a container for children "{}"'.format(children))
     elif container_hint is None:
         return parent
+    else:
+        raise RuntimeError('Does not know how to handle the container_hint "{}"'.format(container_hint))
 
 def suggest_container1(parent, container_type_hint):
     if isinstance(parent, (QMenu, QMenuBar)):
