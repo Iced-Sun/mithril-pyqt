@@ -142,21 +142,22 @@ def build_dict(parent, data, cached):
     return element
 
 def build_list(parent, data, cached):
-    ## transform a plain list to m() object
+    ## find a container for data before we actually insert them
     if not isinstance(data, _Contained_cell):
+        supported_custom_attributes = {'layout', 'columns'}
+
         ## extract the attributes from the list
         if len(data) and isinstance(data[0], dict) and not isinstance(data[0], _Cell_tag):
             attrs = data[0]
+            meta_attrs = {k:attrs.pop(k) for k in supported_custom_attributes & attrs.keys()}
             data = data[1:]
         else:
             attrs = {}
+            meta_attrs = {}
             pass
 
-        ## meta attributes
-        layout = attrs.pop('layout', True)
-
         ## get a container tag or object
-        container = impl.qt_inspector.suggest_container(parent, data, layout)
+        container = impl.qt_inspector.suggest_container(parent, data, meta_attrs.get('layout', True))
 
         if isinstance(container, (str,type)):
             ## returned container is a tag for m(), which means an intermediate
