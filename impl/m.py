@@ -150,6 +150,13 @@ def build_list(parent, data, cached):
     if not isinstance(data, _Contained_cell):
         container = impl.qt_inspector.suggest_container1(parent, data)
         return build(parent, m(container, _Contained_cell(data)))
+        ## extract the attributes from the list
+        if len(data) and isinstance(data[0], dict) and not isinstance(data[0], _Cell_tag):
+            attrs = data[0]
+            data = data[1:]
+        else:
+            attrs = {}
+            pass
 
     ## add child items
     for i, cell in enumerate(data):
