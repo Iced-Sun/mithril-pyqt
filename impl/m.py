@@ -148,8 +148,6 @@ def build_dict(parent, data, cached):
 def build_list(parent, data, cached):
     ## transform a plain list to m() object
     if not isinstance(data, _Contained_cell):
-        container = impl.qt_inspector.suggest_container1(parent, data)
-        return build(parent, m(container, _Contained_cell(data)))
         ## extract the attributes from the list
         if len(data) and isinstance(data[0], dict) and not isinstance(data[0], _Cell_tag):
             attrs = data[0]
@@ -158,7 +156,21 @@ def build_list(parent, data, cached):
             attrs = {}
             pass
 
-    ## add child items
+        ## meta attributes
+        layout = attrs.pop('layout', True)
+
+        ## get a container tag or object
+        container = impl.qt_inspector.suggest_container(parent, data, layout)
+
+        if isinstance(container, str):
+            container = build(parent, m(container, attrs, _Contained_cell(data)))
+        else:
+            ## no container in need
+            container = build(parent, _Contained_cell(data))
+            pass
+        return container
+
+    ## or the data have the parent as the container, hence add child items
     for i, cell in enumerate(data):
         element = build(None, _make_cell(cell))
         impl.qt_inspector.get_bound_attach_method(parent, element)()
