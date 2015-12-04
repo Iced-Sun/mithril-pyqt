@@ -21,7 +21,12 @@ def _make_cell(obj=None):
     if isinstance(obj, _Contained_cell):
         return obj
     elif isinstance(obj, (dict, list, tuple)):
-        class _Tagged_cell(type(obj), _Cell_tag):
+        for _ in (dict, list, tuple):
+            if isinstance(obj, _):
+                reduced_type = _
+                break
+            continue
+
         class _Tagged_cell(reduced_type, _Cell_tag):
             def __repr__(self):
                 return '_Tagged_cell({})'.format(super().__repr__())
