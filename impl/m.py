@@ -159,17 +159,26 @@ def build_list(parent, data, cached):
         ## get a container tag or object
         container = impl.qt_inspector.suggest_container(parent, data, meta_attrs.get('layout', True))
 
+        ## mark the data as with a container
+        cells = _Contained_cell(data)
+
+        ## FIXME hackish work-around to keep the custom attributes for later
+        ## usage when inserting children
+        cells.meta_attrs = meta_attrs
+
+        ## build the container and its children
         if isinstance(container, (str,type)):
             ## returned container is a tag for m(), which means an intermediate
             ## element is required as a container
-            container = build(parent, m(container, attrs, _Contained_cell(data)))
+            container = build(parent, m(container, attrs, cells))
         else:
             ## no intermediate container in need
-            container = build(parent, _Contained_cell(data))
+            container = build(parent, cells)
             pass
+
         return container
 
-    ## or the data have the parent as the container, hence add child items
+    ## now have the container
     for i, cell in enumerate(data):
         ## create the adder object
         adder = cell if isinstance(cell, impl.util._Adder) else impl.util.add(cell)
@@ -182,6 +191,13 @@ def build_list(parent, data, cached):
             adder.target = impl.qt_inspector.get_bound_attach_method(parent, element)
             pass
 
+        ## quirks
+        if 'columns' in data.meta_attrs:
+             ## a grid layout: insert position arguments
+            adder.forwarder.args = divmod(i, data.meta_attrs['columns']) + adder.forwarder.args
+            pass
+
+        ## fine
         adder.apply()
         continue
 
