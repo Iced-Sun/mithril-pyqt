@@ -8,6 +8,9 @@ class _Contained_cell(list, _Cell_tag):
     def __init__(self, meta_attrs, *args):
         super().__init__(*args)
         self.meta_attrs = meta_attrs
+        pass
+    def __repr__(self):
+        return '_Contained_cell({})'.format(super().__repr__())
     pass
 
 def _make_cell(obj=None):
@@ -19,6 +22,9 @@ def _make_cell(obj=None):
         return obj
     elif isinstance(obj, (dict, list, tuple)):
         class _Tagged_cell(type(obj), _Cell_tag):
+        class _Tagged_cell(reduced_type, _Cell_tag):
+            def __repr__(self):
+                return '_Tagged_cell({})'.format(super().__repr__())
             pass
         return _Tagged_cell(obj)
     else:
