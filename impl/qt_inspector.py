@@ -1,3 +1,5 @@
+import impl.util
+
 from PyQt5.QtWidgets import *
 
 def auto_reparentable(element):
@@ -25,7 +27,15 @@ def suggest_container(parent, children, container_hint=True):
         else:
             raise RuntimeError('Does not know how to assign a container for children "{}"'.format(children))
     elif container_hint is None:
+        ## don't need a container
         return parent
+    elif isinstance(container_hint, str):
+        ## a string name of layout
+        if not container_hint.endswith('_layout'):
+            container_hint = container_hint + '_layout'
+            pass
+
+        return container_hint
     else:
         raise RuntimeError('Does not know how to handle the container_hint "{}"'.format(container_hint))
 
