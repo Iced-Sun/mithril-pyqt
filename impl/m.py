@@ -172,8 +172,18 @@ def build_list(parent, data, cached):
 
     ## or the data have the parent as the container, hence add child items
     for i, cell in enumerate(data):
-        element = build(impl.qt_inspector.suggest_parent(parent), _make_cell(cell))
-        impl.qt_inspector.get_bound_attach_method(parent, element)()
+        ## create the adder object
+        adder = cell if isinstance(cell, impl.util._Adder) else impl.util.add(cell)
+
+        ## get the callback to add
+        if isinstance(adder.target, str):
+            adder.target = getattr(parent, _snake_to_camel('add_{}'.format(adder.target)))
+        else:
+            element = build(impl.qt_inspector.suggest_parent(parent), _make_cell(adder.target))
+            adder.target = impl.qt_inspector.get_bound_attach_method(parent, element)
+            pass
+
+        adder.apply()
         continue
 
     return None
