@@ -2,7 +2,7 @@ import impl.util
 
 from PyQt5.QtWidgets import *
 
-def suggest_parent(parent_hint=None):
+def suggest_parent(parent_hint):
     if isinstance(parent_hint, QLayout):
         ## auto re-parent, need and should not set the parent
         return None
@@ -10,10 +10,18 @@ def suggest_parent(parent_hint=None):
         return parent_hint
     pass
 
-def suggest_container(parent, children, container_hint=True):
+def suggest_container(parent, children, container_hint):
     if container_hint == True:
         ## auto guess
-        if isinstance(parent, QMenu):
+        if isinstance(parent, QActionGroup):
+            return parent
+        elif isinstance(parent, QMenu):
+            #if isinstance(children, list) and contained:
+            #    return 'action_group'
+            #elif isinstance(children, tuple) and contained:
+            #    return 'action_group'
+            #else:
+            #    return parent
             return parent
         elif isinstance(children, list):
             return 'h_box_layout'
