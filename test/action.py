@@ -49,11 +49,14 @@ run([
 
 '''
 
+run([('test', m('widget', m('menu', 'Menu')))])
+
+'''
 run([
     ('menu with action group', m('widget', [
         {
             'menu_bar': m('menu_bar', m('menu', 'Menu', [
-                #m('action', 'Auto A'),
+                m('action', 'Auto A'),
                 #'separator',
                 m('action_group', [m('action', 'Auto Action', {'checkable': True}), m('action', 'Auto Action', {'checkable': True})]),
                 m('menu', 'Sub Menu', m('action_group', [m('action', 'Auto Action'), m('action', 'Auto Action')]))
@@ -65,6 +68,7 @@ run([
         }
     ]))
 ])
+'''
 
 '''
     #('', m('widget', m('menu', [m('action', 'Action A'), m('action', 'Action B'), 'Action C'])
@@ -76,24 +80,3 @@ run([
     #('menubar+menu@mainwindow', m('main_window', m('menu_bar', m('menu', 'File', m('action', 'action1'))))),
 '''
 
-'''
-we have three relationships to support: parent-child, add_*, set_*
-
-parent-child is not necessarily visually parent-child
-
-generally, add_* is not owning
-
-rule of thumb:
-set_* is in attribute
-add_* is in children with attach_method
-parent_child is in children
-
-|             | QWidget          | QToolBar   | QMenuBar   | QMenu   | QAction      | misc.                    |
-|-------------+------------------+------------+------------+---------+--------------+--------------------------|
-| QMainWindow | setCentralWidget | addToolBar | setMenuBar |         |              | addToolBarBreak          |
-| QWidget     | addWidget        |            | addWidget  | -       | addAction(s) |                          |
-| QMenuBar    |                  |            |            | addMenu | addAction    | addSeparator             |
-| QMenu       |                  |            |            | addMenu | addAction    | addSection, addSeparator |
-| QToolBar    |                  |            |            |         | addAction    | addSeparator, addWidget  |
-| QLayout     |                  |            | setMenuBar |         |              |                          |
-'''
