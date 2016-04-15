@@ -200,10 +200,16 @@ def build_list(parent, data, cached):
 
         ## get the callback to add
         if isinstance(adder.target, str):
+            ## the callback is specified by name, e.g., `spacing' -> `addSpacing'
             adder.target = getattr(parent, impl.util.snake_to_camel('add_{}'.format(adder.target)))
-        else:
+        elif isinstance(adder.target, (_Cell_tag, list, tuple)):
+            ## if the target is a cell or container (_make_cell will add a
+            ## container_cell tag), deduce a callback by the types of parent
+            ## and child
             element = build(impl.qt_inspector.suggest_parent(parent), _make_cell(adder.target))
             adder.target = impl.qt_inspector.get_bound_attach_method(parent, element)
+        else:
+            raise RuntimeError('Unsupported adder target {}'.format(adder.target))
             pass
 
         ## quirks
