@@ -36,6 +36,15 @@ def _make_cell(obj=None):
         raise RuntimeError('Unsupported cell type {}'.format(obj))
     pass
 
+def _like_a_cell(obj):
+    ## If obj contains or is a cell
+    if isinstance(obj, (list, tuple)):
+        flat_obj = list(impl.util.flatten(obj))
+    else:
+        flat_obj = [obj]
+        pass
+    return any(isinstance(x, _Cell_tag) for x in flat_obj)
+
 def m(tag, *args):
     cell = _make_cell()
 
@@ -213,7 +222,11 @@ def build_list(parent, data, cached):
             pass
 
         ## build cells inside the adder arguments
-        adder.forwarder.args = [build(impl.qt_inspector.suggest_parent(parent), arg) if isinstance(arg, _Cell_tag) else arg for arg in adder.forwarder.args]
+        adder.forwarder.args = [
+            build(impl.qt_inspector.suggest_parent(parent), _make_cell(arg))
+            if _like_a_cell(arg) else arg
+            for arg in adder.forwarder.args
+        ]
 
         ## quirks
         if 'columns' in data.meta_attrs:
