@@ -5,11 +5,12 @@ execution of ~m.mount()~ will then construct the Qt objects upon the cell
 tuple.
 
 The arguments are explained as follows:
-- ~WidgetClass~ :: A factory which will create a widget by calling
-     ~WidgetClass(*args)~ *(TODO what if ~**kwargs~ is in need?)*. It could
-     also be a recognized string that corresponds to a known Qt class, e.g.,
-     ~m('label')~ will be simply treated the same as ~m(QLabel)~.
-- ~*args~ :: See above.
+- ~WidgetClass~ <<m.param.widget.class>> :: A factory which will create a
+     widget by calling ~WidgetClass(*args)~ *(TODO what if ~**kwargs~ is in
+     need?)*. It could also be a recognized string that corresponds to a known
+     Qt class, e.g., ~m('label')~ will be simply treated the same as
+     ~m(QLabel)~.
+- ~*args~ :: See [[m.param.widget.class][above]].
 - ~attributes~ :: A python dict of the widget attributes: ~{"key": val}~ is
      translated to ~QObject.setKey(val)~ during the ~QObject~ construction.
 - ~children~ :: A ~m()~ object or a python list that will be attached to the
@@ -92,7 +93,8 @@ is basically
 #+END_SRC
 
 ** Children wrapped in a container
-A list or tuple of cells will be wrapped in a container by default.
+A list or tuple of cells will be wrapped in a container by default. To skip the
+creation of a container or change the behavior of the container, see [[container.with.attributes][next section]].
 
 For instance,
 #+BEGIN_SRC python
@@ -118,9 +120,9 @@ children, \ie,
 | ~QActionGroup~ | ~None~        | -             |
 | ~QMenu~        | ?             | ?             |
 
-** Container with attributes
-The container could have attributes and constructor arguments (not supported
-yet).
+** Container with attributes <<container.with.attributes>>
+The container could have attributes and constructor arguments (/not supported
+yet/).
 
 #+BEGIN_SRC python
   m('Widget', [{'layout': 'v_box', 'spacing': 30}, label('1'), label('2')])
