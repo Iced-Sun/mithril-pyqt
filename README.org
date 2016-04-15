@@ -21,7 +21,7 @@ following pseudo code:
 #+BEGIN_SRC python
   widget = WidgetClass(*args)
   for k, v in attributes:
-      widget.setK(v)              # K is camel-cased version of k
+      widget.setK(v)              # K is the camel-cased version of k
       continue
   children = ChildClass(*child_args, parent=widget)
   attach_method(widget, children) # see Parent & Children
@@ -30,7 +30,7 @@ following pseudo code:
 ** Parent & Children
 There are two different parent-child relationship in Qt: ownership (between
 ~QObject~) and visual attachment (between ~QWidget~). Related functions are:
-~child = QObject(parent), ~parent.add_*(child)~, ~parent.set_*(child)~.
+~child = QObject(parent)~, ~parent.add_*(child)~, ~parent.set_*(child)~.
 
 1. ~child = QObject(parent)~ sets the ownership (~parent~ owns ~child~, which
    means that ~child~ is automatically destroyed when ~parent~ is
@@ -48,21 +48,21 @@ There are two different parent-child relationship in Qt: ownership (between
 
 2. If the ownership does not imply a visual attachment, we need explicitly call
    ~parent.add_*()~ to ensure the appropriate display. ~parent.add_*()~ may
-   have overloads, in which the parent-child relationship may be different:
+   have overloads, and the parent-child relationship may be different:
 
-   + insert :: ~parent.add_*(object)~ visually attaches the already-exist
+   + insertion :: ~parent.add_*(object)~ visually attaches the already-exist
         ~object~ to the parent; parent will not take the ownership of object,
         with the exception of ~addLayout~ (where the parent widget of layout
         will takes ownership of ~child~).
 
-   + emplace :: ~parent.add_*(*args)~ creates an object and then attach it to
-        the view; parent owns the object. This is actually equivalent to
+   + emplacement :: ~parent.add_*(*args)~ creates an object and then attach it
+        to the view; parent owns the object. This is actually equivalent to
         #+BEGIN_SRC python
           child = WidgetClass(*args, parent=parent)
           parent.add_WHAT_EVER_METHOD(child)
         #+END_SRC
 
-   In ~m()~, the insert version of ~add_*~ (maybe a no-op) is automatically
+   In ~m()~, the insertion version of ~add_*~ (maybe a no-op) is automatically
    inferred and applied with respect to the types of parent and child. For
    instance, ~m('menu_bar', m('menu'))~ will generate
    #+BEGIN_SRC python
@@ -142,7 +142,7 @@ separator, a spacing or a stretch, \etc. This could be simply done by inserting
 a plain string.
 
 #+BEGIN_SRC python
-  m('widget', [m('label', '1'), 'stretch', m.('label', '2')])
+  m('widget', [m('label', '1'), 'stretch', m('label', '2')])
 #+END_SRC
 generates
 #+BEGIN_SRC python
