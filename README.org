@@ -1,0 +1,172 @@
+* Introduction
+~m(WidgetClass, *args=None, attributes=None, children=None)~ creates a ~cell~
+object which is essentially a ~(tag, tag_args, children)~ python tuple. A later
+execution of ~m.mount()~ will then construct the Qt objects upon the cell
+tuple.
+
+The arguments are explained as follows:
+- ~WidgetClass~ :: A factory which will create a widget by calling
+     ~WidgetClass(*args)~ *(TODO what if ~**kwargs~ is in need?)*. It could
+     also be a recognized string that corresponds to a known Qt class, e.g.,
+     ~m('label')~ will be simply treated the same as ~m(QLabel)~.
+- ~*args~ :: See above.
+- ~attributes~ :: A python dict of the widget attributes: ~{"key": val}~ is
+     translated to ~QObject.setKey(val)~ during the ~QObject~ construction.
+- ~children~ :: A ~m()~ object or a python list that will be attached to the
+     current widget. The attach method is always implicitly inferred.
+
+Generally, ~m(WidgetClass, *args, attributes, children)~ effective produces the
+following pseudo code:
+#+BEGIN_SRC python
+  widget = WidgetClass(*args)
+  for k, v in attributes:
+      widget.setK(v)              # K is camel-cased version of k
+      continue
+  children = ChildClass(*child_args, parent=widget)
+  attach_method(widget, children) # see Parent & Children
+#+END_SRC
+
+** Parent & Children
+There are two different parent-child relationship in Qt: ownership (between
+~QObject~) and visual attachment (between ~QWidget~). Related functions are:
+~child = QObject(parent), ~parent.add_*(child)~, ~parent.set_*(child)~.
+
+1. ~child = QObject(parent)~ sets the ownership (~parent~ owns ~child~, which
+   means that ~child~ is automatically destroyed when ~parent~ is
+   destroyed).
+
+   Generally, ~child~ is visually attached to ~parent~ if ~parent~ and ~child~
+   are both ~QWidget~, with a few exceptions (of course):
+
+   + ~QWidget~ and ~QMenu~ (\ie, ~QMenu(parent=QWidget())~ will not display a
+     menu in a widget)
+
+   In ~m()~, a cell will always be created with a parent (except the case that
+   the parent is a ~QLayout~, since ~QLayout::addWidget()~ will take care of
+   the ownership).
+
+2. If the ownership does not imply a visual attachment, we need explicitly call
+   ~parent.add_*()~ to ensure the appropriate display. ~parent.add_*()~ may
+   have overloads, in which the parent-child relationship may be different:
+
+   + insert :: ~parent.add_*(object)~ visually attaches the already-exist
+        ~object~ to the parent; parent will not take the ownership of object,
+        with the exception of ~addLayout~ (where the parent widget of layout
+        will takes ownership of ~child~).
+
+   + emplace :: ~parent.add_*(*args)~ creates an object and then attach it to
+        the view; parent owns the object. This is actually equivalent to
+        #+BEGIN_SRC python
+          child = WidgetClass(*args, parent=parent)
+          parent.add_WHAT_EVER_METHOD(child)
+        #+END_SRC
+
+   In ~m()~, the insert version of ~add_*~ (maybe a no-op) is automatically
+   inferred and applied with respect to the types of parent and child. For
+   instance, ~m('menu_bar', m('menu'))~ will generate
+   #+BEGIN_SRC python
+     mb = QMenuBar(parent=None)
+     m = QMenu(parent=mb)
+     mb.addMenu(m)
+   #+END_SRC
+   while ~m('label', m('label'))~ generates
+   #+BEGIN_SRC python
+     pl = QLabel(parent=None)
+     cl = QLabel(parent=pl)
+   #+END_SRC
+
+3. ~parent.set_*~ is rarely used (~setCentralwidget~ and ~setMenubar~), and the
+   parent usually takes ownership of the child.
+
+* Magic explained
+
+** Single child
+#+BEGIN_SRC python
+  m('label', 'parent', {'indent': 20}, m('label', 'child'))
+#+END_SRC
+is basically
+#+BEGIN_SRC python
+  parent = QLabel('parent', parent=None)
+  parent.setIndent(20)
+  child = QLabel('child', parent=parent)
+#+END_SRC
+
+** Children wrapped in a container
+A list or tuple of cells will be wrapped in a container by default.
+
+For instance,
+#+BEGIN_SRC python
+  m('label', 'parent', [m('label', 'child A'), m('label', 'child B')])
+#+END_SRC
+is translated to
+#+BEGIN_SRC python
+  parent = QLabel('parent', parent=None)
+  container = QHBoxLayout(parent=parent)
+
+  child_a = QLabel('child A', parent=None) # Note: don't set the parent here
+  container.addWidget(child_a)             # auto re-parent by QLayout
+
+  child_b = QLabel('child B', parent=None)
+  container.addWidget(child_b)
+#+END_SRC
+
+The container type is automatically inferred by the type of the parent and
+children, \ie,
+|                | ~list~        | ~tuple~       |
+|----------------+---------------+---------------|
+| ~QWidget~      | ~QHBoxLayout~ | ~QVBoxLayout~ |
+| ~QActionGroup~ | ~None~        | -             |
+| ~QMenu~        | ?             | ?             |
+
+** Container with attributes
+The container could have attributes and constructor arguments (not supported
+yet).
+
+#+BEGIN_SRC python
+  m('Widget', [{'layout': 'v_box', 'spacing': 30}, label('1'), label('2')])
+#+END_SRC
+is translated to
+#+BEGIN_SRC python
+  parent = QLabel('parent', parent=None)
+  container = QVBoxLayout(parent=parent) # set by the 'layout' attribute
+  container.setSpacing(30)               # automatically generated by the 'spacing' attribute
+  container.addWidget(QLabel('1', parent=None)) # save some typings
+  container.addWidget(QLabel('2', parent=None))
+#+END_SRC
+
+** Container element other than a cell
+A container (\eg, ~QMenu~, ~QLayout~) may have a non-object element, such as a
+separator, a spacing or a stretch, \etc. This could be simply done by inserting
+a plain string.
+
+#+BEGIN_SRC python
+  m('widget', [m('label', '1'), 'stretch', m.('label', '2')])
+#+END_SRC
+generates
+#+BEGIN_SRC python
+  parent = QLabel('parent', parent=None)
+  container = QHBoxLayout(parent=parent)
+  container.addWidget(QLabel('1', parent=None))
+  container.addStretch()
+  container.addWidget(QLabel('2', parent=None))
+#+END_SRC
+
+** Container element with extra arguments
+Whether a container element is a cell or not, extra arguments may need be
+passed to the ~add_*~ functions. A helper function ~m.add(method_or_cell,
+*method_args)~ (get a better name or representation?) is thus provided for the
+task.
+
+#+BEGIN_SRC python
+  m('Widget', ['stretch', label('1'), m.add('spacing', 80),  m.add(label('2'), 0, Qt.AlignLeft)])
+#+END_SRC
+is expanded to
+#+BEGIN_SRC python
+  widget = QWidget(parent=None)
+  container = QHBoxLayout(parent=None)
+  container.addStretch()
+  container.addWidget(QLabel('1', parent=None))
+  container.addSpacing(80)
+  container.addWidget(QLabel('2', parent=None), 0, Qt.AlignLeft)
+#+END_SRC
+
