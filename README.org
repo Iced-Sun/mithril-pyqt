@@ -242,3 +242,41 @@ Vanilla ~QGridLayout~:
       [m('label', '7'), m('label', '8'), m('label', '9')]
   ))
 #+END_SRC
+
+** The nested container with extra arguments
+A relatively complex example:
+#+BEGIN_SRC python
+  m('widget', [
+      {'layout': 'grid', 'columns': 3},
+
+      m.add([m('label', '1'), m('label', '1')], 1, 2),  None,            m('label', '3'),
+      m.add((m('label', '4'), m('label', '4')), 2, 1),  m('label', '5'), m('label', '6'),
+      None,                                             m('label', '8'), m('label', '9')
+  ])
+#+END_SRC
+generates
+#+BEGIN_SRC python
+  widget = QWidget(parent=None)
+  container = QGridLayout(parent=widget)
+
+  ## m.add([m('label', '1'), m('label', '1')], 1, 2)
+  sub_container1 = QHBoxLayout(parent=container)
+  sub_container1.addWidget(QLabel('1', parent=None))
+  sub_container1.addWidget(QLabel('1', parent=None))
+  # (row, column) arguments are automatically calculated (0,0)
+  #
+  # (rowSpan, columnSpan) arguments are read from the code
+  container.addLayout(sub_container1, 0, 0, 1, 2)
+
+  container.addWidget(QLabel('3', parent=None), 0, 2)
+
+  sub_container2 = QVBoxLayout(parent=container)
+  sub_container2.addWidget(QLabel('4', parent=None))
+  sub_container2.addWidget(QLabel('4', parent=None))
+  container.addLayout(sub_container2, 0, 1, 2, 1)
+
+  container.addWidget(QLabel('5', parent=None), 1, 1)
+  container.addWidget(QLabel('6', parent=None), 1, 2)
+  container.addWidget(QLabel('8', parent=None), 2, 1)
+  container.addWidget(QLabel('9', parent=None), 2, 2)
+#+END_SRC
