@@ -68,7 +68,7 @@ There are two different parent-child relationship in Qt: ownership (between
    #+BEGIN_SRC python
      mb = QMenuBar(parent=None)
      m = QMenu(parent=mb)
-     mb.addMenu(m)
+     mb.addMenu(m)                   # inferred by QMenuBar and QMenu
    #+END_SRC
    while ~m('label', m('label'))~ generates
    #+BEGIN_SRC python
@@ -135,6 +135,8 @@ is translated to
   container.addWidget(QLabel('1', parent=None)) # save some typings
   container.addWidget(QLabel('2', parent=None))
 #+END_SRC
+
+The container will not be constructed if the ~layout~ attribute is set to ~None~.
 
 ** Container element other than a cell
 A container (\eg, ~QMenu~, ~QLayout~) may have a non-object element, such as a
