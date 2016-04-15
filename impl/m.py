@@ -168,18 +168,18 @@ def build_list(parent, data, cached):
         ## extract the attributes from the list
         if len(data) and isinstance(data[0], dict) and not isinstance(data[0], _Cell_tag):
             attrs = data[0]
-            container_attrs = {k:attrs.pop(k) for k in supported_custom_attributes & attrs.keys()}
+            meta_attrs = {k:attrs.pop(k) for k in supported_custom_attributes & attrs.keys()}
             data = data[1:]
         else:
             attrs = {}
-            container_attrs = {}
+            meta_attrs = {}
             pass
 
         ## get a container tag or object
-        container = impl.qt_inspector.suggest_container(parent, data, container_attrs.get('layout', True))
+        container = impl.qt_inspector.suggest_container(parent, data, meta_attrs.get('layout', True))
 
         ## mark the data as with a container, and keep the meta_attrs
-        cells = _Contained_cell(container_attrs, data)
+        cells = _Contained_cell(meta_attrs, data)
 
         ## build the container and its children
         if isinstance(container, (str,type)):
