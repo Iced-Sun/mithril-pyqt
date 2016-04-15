@@ -184,7 +184,7 @@ is expanded to
   container.addWidget(QLabel('2', parent=None), 0, Qt.AlignLeft)
 #+END_SRC
 
-** The ~QGridLayout~ container and nested layout
+** The ~QGridLayout~ container
 The container logic is very neat when a grid layout is in need. Take this as an
 example:
 #+BEGIN_SRC python
@@ -210,3 +210,35 @@ The expanded code will read as
   container.addWidget(QLabel('9',parent=None), 2, 2)
 #+END_SRC
 
+** The nested container
+A grid layout can be emulated by nesting ~QVBoxlayout~ and ~QHBoxlayout~.
+
+The following three layout are visually the same.
+
+Vanilla ~QGridLayout~:
+#+BEGIN_SRC python
+  m('Widget', [
+      {'layout': 'grid', 'columns': 3},
+      m('label', '1'), m('label', '2'), m('label', '3'),
+      m('label', '4'), m('label', '5'), m('label', '6'),
+      m('label', '7'), m('label', '8'), m('label', '9')
+  ])
+#+END_SRC
+
+~QVBoxLayout~ nested in ~QHBoxLayout~:
+#+BEGIN_SRC python
+  m('Widget', [
+      (m('label', '1'), m('label', '4'), m('label', '7')),
+      (m('label', '2'), m('label', '5'), m('label', '8')),
+      (m('label', '3'), m('label', '6'), m('label', '9'))
+  ])
+#+END_SRC
+
+~QHBoxLayout~ nested in ~QVBoxLayout~:
+#+BEGIN_SRC python
+  m('Widget', (
+      [m('label', '1'), m('label', '2'), m('label', '3')],
+      [m('label', '4'), m('label', '5'), m('label', '6')],
+      [m('label', '7'), m('label', '8'), m('label', '9')]
+  ))
+#+END_SRC
