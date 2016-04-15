@@ -196,7 +196,8 @@ example:
       m('label', '7'), None,            m('label', '9')
   ])
 #+END_SRC
-will create a ~QGridLayout~ with 3 columns.
+will create a ~QGridLayout~ with 3 columns. ~None~ indicates a position which
+is not occupied.
 
 The expanded code will read as
 #+BEGIN_SRC python
