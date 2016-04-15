@@ -41,6 +41,7 @@ def suggest_container(parent, children, container_hint):
         return container_hint
     else:
         raise RuntimeError('Does not know how to handle the container_hint "{}"'.format(container_hint))
+    return
 
 def find_qt_class(name):
     name_ = name if name.startswith('Q') else 'Q' + name
@@ -52,11 +53,19 @@ def find_qt_class(name):
     return
 
 def get_unbound_attach_method(Parent, Child):
-    """Return an unbound method of Parent that will attach the child to the parent.
+    """Return an unbound method of Parent that will visually attach the child
+    to the parent.
     """
 
+    ## the attach method is no-op by default
     method = lambda *args: None
 
+    ## double dispatch on Parent and Child
+    ##
+    ## Classes need love: QLayout, QActionGroup, QAction, QMenuBar, QMenu,
+    ## where QMenuBar and QMenu are QWidget.
+    ##
+    ## The order of conditions matters (becaus QMenuBar and QMenu are QWidget).
     if Parent is type(None) or Child is type(None):
         pass
     elif issubclass(Parent, QLayout):
@@ -65,6 +74,8 @@ def get_unbound_attach_method(Parent, Child):
         elif issubclass(Child, QWidget):
             method = Parent.addWidget
         else:
+            ## the child of layout should be either a QWidget or another
+            ## QLayout
             method = None
     elif issubclass(Child, QLayout):
         pass
@@ -72,19 +83,20 @@ def get_unbound_attach_method(Parent, Child):
         if issubclass(Parent, (QMenuBar, QMenu)):
             method = Parent.addMenu
         elif issubclass(Parent, QWidget):
-            ## FIMXE should warn here: the menu is invisibly attached to the
-            ## parent
+            raise RuntimeWarning('QMenu cannot be visually attached directly to QWidget')
             pass
         else:
+            ## This should not happen...
             method = None
     elif issubclass(Child, QAction):
         method = Parent.addAction
     elif issubclass(Child, QActionGroup):
         method = lambda parent, child: Parent.addActions(parent, child.actions())
     elif issubclass(Parent, QWidget) and issubclass(Child, QWidget):
-        ## already attached, but without a layout manager
+        ## already visually attached
         pass
     else:
+        ## this is an error
         method = None
         pass
 
