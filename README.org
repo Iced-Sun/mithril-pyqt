@@ -1,8 +1,8 @@
 * TODOs
-** Test suite [1/5]
-- [ ] ~simple.py~
+** Test suite [3/5]
+- [X] ~simple.py~
 - [X] ~layout.py~
-- [ ] ~grid.py~
+- [X] ~grid.py~
 - [ ] ~form.py~
 - [ ] ~action.py~
 ** Function [/]
