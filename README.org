@@ -172,7 +172,7 @@ passed to the ~add_*~ functions. A helper function ~m.add(method_or_cell,
 task.
 
 #+BEGIN_SRC python
-  m('Widget', ['stretch', label('1'), m.add('spacing', 80),  m.add(label('2'), 0, Qt.AlignLeft)])
+  m('Widget', ['stretch', m('label', '1'), m.add('spacing', 80),  m.add(m('label', '2'), 0, Qt.AlignLeft)])
 #+END_SRC
 is expanded to
 #+BEGIN_SRC python
@@ -191,9 +191,9 @@ example:
   m('widget', [
       {'layout': 'grid', 'columns': 3},
 
-      label('1'), None,       label('3'),
-      None,       label('5'), None,
-      label('7'), None,       label('9')
+      m('label', '1'), None,            m('label', '3'),
+      None,            m('label', '5'), None,
+      m('label', '7'), None,            m('label', '9')
   ])
 #+END_SRC
 will create a ~QGridLayout~ with 3 columns.
