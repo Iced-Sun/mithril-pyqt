@@ -212,6 +212,9 @@ def build_list(parent, data, cached):
             raise RuntimeError('Unsupported adder target {}'.format(adder.target))
             pass
 
+        ## build cells inside the adder arguments
+        adder.forwarder.args = [build(impl.qt_inspector.suggest_parent(parent), arg) if isinstance(arg, _Cell_tag) else arg for arg in adder.forwarder.args]
+
         ## quirks
         if 'columns' in data.meta_attrs:
              ## a grid layout: insert position arguments
