@@ -5,7 +5,7 @@ run([
     ## fundamental support
     ('No layout', m('widget', [{'layout': None}, label('1'), label('  2')])),
     ('H', m('Widget', [label('1'), label('2'), label('3')])),
-    ('H+attr', m('Widget', [{'layout': True, 'spacing': 30,}, label('1'), label('2')])),
+    ('H+attr', m('Widget', [{'layout': True, 'spacing': 30}, label('1'), label('2')])),
 
     ## nested layout
     ('H', m('widget', [label('1'), label('2'), label('3')])),
@@ -31,7 +31,7 @@ run([
     ('H+item', m('widget', [label('1'), 'stretch', label('2'), label('3')])),
     ('H+item(arg)', m('Widget', ['stretch', label('1'), m.add('spacing', 80), label('2'), label('3')])),
 
-    ('H+full-demo', m('Widget', [ # [] denotes a HBox by default
+    ('H+full', m('Widget', [ # [] denotes a HBox by default
         {
             'layout': 'v_box',    # but use VBox instead
             'spacing': 20,        # setSpacing

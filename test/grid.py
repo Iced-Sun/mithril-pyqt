@@ -1,10 +1,8 @@
 from config import *
 
-run([
-    ('G41', m('widget', [
-        {
-            'layout': 'grid',
-        },
+run([(
+    'G41', m('widget', [
+        {'layout': 'grid',},
         label('1'),
         label('2'),
         label('3'),

@@ -29,5 +29,5 @@ def run(cell):
         _ = m.render(None, cell)
         pass
 
-    sys.exit(app.exec())
+    sys.exit(app.exec_())
 

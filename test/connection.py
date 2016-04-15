@@ -25,7 +25,7 @@ class Controller(QObject):
 ctrl = Controller()
 
 run([
-    ('print', m('Widget', [m('label', text()), m('line_edit', {'on_text_edited': text})])),
+    ('standard output', m('Widget', [m('label', text()), m('line_edit', {'on_text_edited': text})])),
 
     ('connect signal by id (programmable)', m('Widget', [m('label#label1', 'init text'), m('line_edit', {
         'on_text_edited': lambda text: m.get_element_by_id('label1').setText(text)
