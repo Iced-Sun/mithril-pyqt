@@ -32,3 +32,12 @@ class _Adder(object):
 
 def add(target, *args, **kwargs):
     return _Adder(target, *args, **kwargs)
+
+## c.f. http://stackoverflow.com/questions/17485747/how-to-convert-a-nested-list-into-a-one-dimensional-list-in-python
+def flatten(lis):
+    for item in lis:
+        if isinstance(item, (list, tuple)) and not isinstance(item, str):
+            for x in flatten(item):
+                yield x
+        else:
+            yield item
