@@ -184,3 +184,28 @@ is expanded to
   container.addWidget(QLabel('2', parent=None), 0, Qt.AlignLeft)
 #+END_SRC
 
+** The ~QGridLayout~ container and nested layout
+The container logic is very neat when a grid layout is in need. Take this as an
+example:
+#+BEGIN_SRC python
+  m('widget', [
+      {'layout': 'grid', 'columns': 3},
+
+      label('1'), None,       label('3'),
+      None,       label('5'), None,
+      label('7'), None,       label('9')
+  ])
+#+END_SRC
+will create a ~QGridLayout~ with 3 columns.
+
+The expanded code will read as
+#+BEGIN_SRC python
+  widget = QWidget(parent=None)
+  container = QGridLayout(parent=container)
+  container.addWidget(QLabel('1',parent=None), 0, 0)
+  container.addWidget(QLabel('3',parent=None), 0, 2)
+  container.addWidget(QLabel('5',parent=None), 1, 1)
+  container.addWidget(QLabel('7',parent=None), 2, 0)
+  container.addWidget(QLabel('9',parent=None), 2, 2)
+#+END_SRC
+
