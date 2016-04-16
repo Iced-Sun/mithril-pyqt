@@ -83,7 +83,7 @@ def get_unbound_attach_method(Parent, Child):
         if issubclass(Parent, (QMenuBar, QMenu)):
             method = Parent.addMenu
         elif issubclass(Parent, QWidget):
-            raise RuntimeWarning('QMenu cannot be visually attached directly to QWidget')
+            ##raise RuntimeWarning('QMenu cannot be visually attached directly to QWidget')
             pass
         else:
             ## This should not happen...
