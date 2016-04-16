@@ -1,22 +1,24 @@
 from config import *
 
-'''
 run([
-    ('invisible action@widget', m('widget', m('action', 'Action'))),
-    ('invisible menu & action@widget', m('widget', m('menu', 'Menu', m('action', 'Action')))),
-    ('invisible menu & visible action@widget+layout', m('widget', (m('menu', 'Menu', m('action', 'Action')),))),
+    ('widget+action', m('widget', m('action', 'Action'))),
 
-    ('menubar@widget', m('widget', [m('menu_bar', m('menu', 'Menu', m('action', 'Action'))), label('1'), label('2')])),
-    ('menubar in layout@widget', m('widget', [
+    ('widget+menu+action', m('widget', m('menu', 'Menu', m('action', 'Action')))),
+    ('widget+[menu+action]', m('widget', [m('menu', 'Menu', m('action', 'Action'))])),
+    ('widget+menubar+action', m('widget', m('menu_bar', m('action', 'Action')))),
+    ('widget+menubar+menu+action', m('widget', m('menu_bar', m('menu', m('action', 'Action'))))),
+    
+    ('widget+[menubar+menu+action]', m('widget', [m('menu_bar', m('menu', 'Menu', m('action', 'Action'))), label('1'), label('2')])),
+    ('widget+[].setMenuBar', m('widget', [
         {
-            'layout': 'grid_layout',
-            'spacing': 20,
+            'container': 'grid',
+            'columns': 2,
             'menu_bar': m('menu_bar', m('menu', 'Menu', m('action', 'Action'))),
         },
-        label('1'), label('2')
+        label('1'), label('2'), label('3'), label('4')
     ])),
 
-    ('multiple actions', m('widget', [
+    ('widget+[].setMenuBar(adders)', m('widget', [
         {
             'menu_bar': m('menu_bar', m('menu', 'Menu', [
                 m('action', 'Auto A'),
@@ -30,6 +32,12 @@ run([
             ])),
         },
     ])),
+
+
+])
+
+'''
+run([
 
     ('nested menu', m('widget', [
         {
@@ -46,10 +54,7 @@ run([
         },
     ])),
 ])
-
 '''
-
-run([('test', m('widget', m('menu', 'Menu')))])
 
 '''
 run([
@@ -57,11 +62,14 @@ run([
         {
             'menu_bar': m('menu_bar', m('menu', 'Menu', [
                 m('action', 'Auto A'),
-                #'separator',
-                m('action_group', [m('action', 'Auto Action', {'checkable': True}), m('action', 'Auto Action', {'checkable': True})]),
-                m('menu', 'Sub Menu', m('action_group', [m('action', 'Auto Action'), m('action', 'Auto Action')]))
-                #'separator',
-                #(m('action', 'Auto B-1', {'checkable': True}), m('action', 'Auto B-2', {'checkable': True})),
+                'separator',
+                m('action_group', [
+                    m('action', 'Auto Action', {'checkable': True}),
+                    m('action', 'Auto Action', {'checkable': True})
+                ]),
+                m('menu', 'Sub Menu', m('action_group', [m('action', 'Auto Action'), m('action', 'Auto Action')])),
+                'separator',
+                (m('action', 'Auto B-1', {'checkable': True}), m('action', 'Auto B-2', {'checkable': True})),
                 #[m('action', 'Auto C-1'), m('action', 'Auto C-2')],
                 #'separator',
             ])),
