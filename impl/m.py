@@ -217,6 +217,10 @@ def build_list(parent, data, cached):
             ## and child
             element = build(impl.qt_inspector.suggest_parent(parent), _make_cell(adder.target))
             adder.target = impl.qt_inspector.get_bound_attach_method(parent, element)
+        elif adder.target is None:
+            ## a placeholder (currently only used in grid layout)
+            adder.target = lambda *args: None
+            pass
         else:
             raise RuntimeError('Unsupported adder target {}'.format(adder.target))
             pass
