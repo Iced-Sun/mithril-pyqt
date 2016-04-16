@@ -222,11 +222,11 @@ def build_list(parent, data, cached):
             pass
 
         ## build cells inside the adder arguments
-        adder.forwarder.args = [
+        adder.forwarder.args = tuple(
             build(impl.qt_inspector.suggest_parent(parent), _make_cell(arg))
             if _like_a_cell(arg) else arg
             for arg in adder.forwarder.args
-        ]
+        )
 
         ## quirks
         if 'columns' in data.meta_attrs:
