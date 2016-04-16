@@ -2,7 +2,7 @@ from config import *
 run([
     ('Form', m('widget', [
         {
-            'layout': 'form'
+            'container': 'form'
         },
 
         label('1'),               # addWidget
