@@ -100,9 +100,20 @@ def apply_attribute_to(element, key, val):
             pass
     elif key.startswith('on_') and hasattr(element, impl.util.snake_to_camel(key[3:])):
         signal = getattr(element, impl.util.snake_to_camel(key[3:]))
+
+        ## the `val' is the a slot, just connect them and return
         if callable(val):
             signal.connect(val)
-        elif isinstance(val, dict):
+            ### NOTE exit point
+            return
+
+        ## normalize the `val' if it is a flatten shortcut, e.g., '#label4::set_text'
+        if isinstance(val, str):
+            val = {'slot': val}
+            pass
+
+        ## pass the slot specification
+        if isinstance(val, dict):
             if 'selector' not in val:
                 parts = val['slot'].split('::')
                 selector = parts[0]
