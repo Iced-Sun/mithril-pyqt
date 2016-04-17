@@ -82,6 +82,10 @@ def get_unbound_attach_method(Parent, Child):
             method = None
     elif issubclass(Child, QLayout):
         pass
+    elif issubclass(Child, QAction):
+        method = Parent.addAction
+    elif issubclass(Child, QActionGroup):
+        method = lambda parent, child: Parent.addActions(parent, child.actions())
     elif issubclass(Child, QMenu):
         if issubclass(Parent, (QMenuBar, QMenu)):
             method = Parent.addMenu
@@ -91,10 +95,6 @@ def get_unbound_attach_method(Parent, Child):
         else:
             ## This should not happen...
             method = None
-    elif issubclass(Child, QAction):
-        method = Parent.addAction
-    elif issubclass(Child, QActionGroup):
-        method = lambda parent, child: Parent.addActions(parent, child.actions())
     elif issubclass(Parent, QWidget) and issubclass(Child, QWidget):
         ## already visually attached
         pass
