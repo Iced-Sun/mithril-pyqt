@@ -1,50 +1,53 @@
 * TODOs
-** Test suite [3/5]
+** Test suite [4/7]
 - [X] ~simple.py~
 - [X] ~layout.py~
 - [X] ~grid.py~
-- [ ] ~form.py~
-- [ ] ~action.py~
-** Function [/]
+- [X] ~form.py~
+- [ ] ~menu.py~
+- [ ] ~toolbar.py~
+- [ ] ~signal.py~
+** Features [0/3]
 - [ ] 'rows' attributes in grid layout
+- [ ] ability to take a ~QObject~ as children arguments in ~m()~
+- [ ] provide alternative call syntax, \eg, ~m.label(*)~ is ~m('label', *)~
 
 * Introduction
-~m(WidgetClass, *args=None, attributes=None, children=None)~ creates a ~cell~
-object which is essentially a ~(tag, tag_args, children)~ python tuple. A later
-execution of ~m.mount()~ will then construct the Qt objects upon the cell
-tuple.
+~m(tag, *args=None, attributes=None, children=None)~ creates a ~cell~ object
+which contains the meta information of an element. A later execution of
+~build()~ will then construct the Qt objects based upon the ~cell~ object.
 
 The arguments are explained as follows:
-- ~WidgetClass~ <<m.param.widget.class>> :: A factory which will create a
+- ~tag~ <<m.param.tag>> :: A factory which will create a
      widget by calling ~WidgetClass(*args)~ *(TODO what if ~**kwargs~ is in
-     need?)*. It could also be a recognized string that corresponds to a known
+     need?)*. It could be also a recognized string that corresponds to a known
      Qt class, e.g., ~m('label')~ will be simply treated the same as
      ~m(QLabel)~.
-- ~*args~ :: See [[m.param.widget.class][above]].
-- ~attributes~ :: A python dict of the widget attributes: ~{"key": val}~ is
-     translated to ~QObject.setKey(val)~ during the ~QObject~ construction.
-- ~children~ :: A ~m()~ object or a python list that will be attached to the
-     current widget. The attach method is always implicitly inferred.
+- ~*args~ :: See [[m.param.tag][above]].
+- ~attributes~ :: A dict of the tag attributes: ~{"key": val}~ leads a call of
+     ~QObject.setKey(val)~ at last.
+- ~children~ :: A ~m()~ object, a list or a tuple that will be attached to the
+     current element. The attach method is always implicitly inferred.
 
-Generally, ~m(WidgetClass, *args, attributes, children)~ effective produces the
+Generally, ~m(tag, *args, attributes, children)~ effective produces the
 following pseudo code:
 #+BEGIN_SRC python
-  widget = WidgetClass(*args)
+  element = tag_induced_element_type(*args)
   for k, v in attributes:
-      widget.setK(v)              # K is the camel-cased version of k
+      element.setK(v)             # K is the camel-cased version of k
       continue
-  children = ChildClass(*child_args, parent=widget)
-  attach_method(widget, children) # see Parent & Children
+  children = ChildClass(*child_args, parent=element)
+  attach(element, children)       # see Parent & Children
 #+END_SRC
 
 ** Parent & Children
 There are two different parent-child relationship in Qt: ownership (between
-~QObject~) and visual attachment (between ~QWidget~). Related functions are:
-~child = QObject(parent)~, ~parent.add_*(child)~, ~parent.set_*(child)~.
+~QObject~) and visual attachment/placement (between ~QWidget~). Involved
+functions are: ~child = QObject(parent)~, ~parent.add_*(child)~,
+~parent.set_*(child)~.
 
 1. ~child = QObject(parent)~ sets the ownership (~parent~ owns ~child~, which
-   means that ~child~ is automatically destroyed when ~parent~ is
-   destroyed).
+   means that ~child~ is automatically destroyed when ~parent~ is destroyed).
 
    Generally, ~child~ is visually attached to ~parent~ if ~parent~ and ~child~
    are both ~QWidget~, with a few exceptions (of course):
@@ -57,10 +60,10 @@ There are two different parent-child relationship in Qt: ownership (between
    the ownership).
 
 2. If the ownership does not imply a visual attachment, we need explicitly call
-   ~parent.add_*()~ to ensure the appropriate display. ~parent.add_*()~ may
-   have overloads, and the parent-child relationship may be different:
+   ~parent.add_*()~ to ensure the appropriate display. ~parent.add_*()~ usually
+   has overloaded versions, and the parent-child relationship may be different:
 
-   + insertion :: ~parent.add_*(object)~ visually attaches the already-exist
+   + insertion :: ~parent.add_*(object)~ visually attaches the already-existing
         ~object~ to the parent; parent will not take the ownership of object,
         with the exception of ~addLayout~ (where the parent widget of layout
         will takes ownership of ~child~).
@@ -68,7 +71,7 @@ There are two different parent-child relationship in Qt: ownership (between
    + emplacement :: ~parent.add_*(*args)~ creates an object and then attach it
         to the view; parent owns the object. This is actually equivalent to
         #+BEGIN_SRC python
-          child = WidgetClass(*args, parent=parent)
+          child = ChildClass(*args, parent=parent)
           parent.add_WHAT_EVER_METHOD(child)
         #+END_SRC
 
@@ -84,16 +87,31 @@ There are two different parent-child relationship in Qt: ownership (between
    #+BEGIN_SRC python
      pl = QLabel(parent=None)
      cl = QLabel(parent=pl)
+     # no-op
    #+END_SRC
 
-3. ~parent.set_*~ is rarely used (~setCentralwidget~ and ~setMenubar~), and the
-   parent usually takes ownership of the child.
+3. The difference between the family of ~parent.set_*~
+   (~QMainWindow::setCentralWidget~, ~QMainWindow::setMenuBar~,
+   ~QLayout::setMenuBar~) and ~parent.add_*~ functions is that ~set_*~ takes a
+   lot of care on the geometry, while ~parent.add_*~ is usually logical. If the
+   ownership of the child is taken by the parent depends, \eg, ~QMainWindow~
+   takes ownership while ~QLayout~ doesn't.
 
-* Magic explained
+* Examples
+For clearances (and saving some typing), a shortcut ~label('text')~ will be
+used instead of ~m('label', 'text')~.
+
+#+BEGIN_SRC python
+  def label(*args):
+      return m('label', *args)
+#+END_SRC
 
 ** Single child
+The example shows a parent element with argument and attribute and its child
+element.
+
 #+BEGIN_SRC python
-  m('label', 'parent', {'indent': 20}, m('label', 'child'))
+  label('parent', {'indent': 20}, label('child'))
 #+END_SRC
 is basically
 #+BEGIN_SRC python
@@ -127,8 +145,8 @@ children, \ie,
 |                | ~list~        | ~tuple~       |
 |----------------+---------------+---------------|
 | ~QWidget~      | ~QHBoxLayout~ | ~QVBoxLayout~ |
-| ~QActionGroup~ | ~None~        | -             |
-| ~QMenu~        | ?             | ?             |
+| ~QActionGroup~ | self          | -             |
+| ~QMenu~        | self          | self          |
 
 ** Container with attributes <<container.with.attributes>>
 The container could have attributes and constructor arguments (/not supported
@@ -171,6 +189,8 @@ passed to the ~add_*~ functions. A helper function ~m.add(method_or_cell,
 *method_args)~ (get a better name or representation?) is thus provided for the
 task.
 
+~m.add()~ is only applicable in a container.
+
 #+BEGIN_SRC python
   m('Widget', ['stretch', m('label', '1'), m.add('spacing', 80),  m.add(m('label', '2'), 0, Qt.AlignLeft)])
 #+END_SRC
@@ -210,7 +230,7 @@ The expanded code will read as
   container.addWidget(QLabel('9',parent=None), 2, 2)
 #+END_SRC
 
-** The nested container
+** Nested container
 A grid layout can be emulated by nesting ~QVBoxlayout~ and ~QHBoxlayout~.
 
 The following three layout are visually the same.
@@ -243,7 +263,7 @@ Vanilla ~QGridLayout~:
   ))
 #+END_SRC
 
-** The nested container with extra arguments
+** Nested container with extra arguments
 A relatively complex example:
 #+BEGIN_SRC python
   m('widget', [
@@ -280,3 +300,4 @@ generates
   container.addWidget(QLabel('8', parent=None), 2, 1)
   container.addWidget(QLabel('9', parent=None), 2, 2)
 #+END_SRC
+
