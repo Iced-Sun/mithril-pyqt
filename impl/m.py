@@ -197,6 +197,8 @@ def build_list(parent, data, cached):
             container = build(parent, m(container, attrs, cells))
         else:
             ## no intermediate container in need
+            if attrs or (meta_attrs and meta_attrs.get('container') is not None):
+                raise RuntimeError('Unhandled container attributes: {}'.format(attrs.update(meta_attrs) or attrs))
             container = build(parent, cells)
             pass
 
