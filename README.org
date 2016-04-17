@@ -1,10 +1,10 @@
 * TODOs
-** Test suite [4/7]
+** Test suite [5/7]
 - [X] ~simple.py~
 - [X] ~layout.py~
 - [X] ~grid.py~
 - [X] ~form.py~
-- [ ] ~menu.py~
+- [X] ~menu.py~
 - [ ] ~toolbar.py~
 - [ ] ~signal.py~
 ** Features [0/3]
