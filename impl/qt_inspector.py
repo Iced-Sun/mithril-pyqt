@@ -12,17 +12,20 @@ def suggest_parent(parent_hint):
 
 def suggest_container(parent, children, container_hint):
     if container_hint == True:
-        ## auto guess
-        if isinstance(parent, QActionGroup):
+        ## Automatically guess if we should add an intermediate object the
+        ## contain a list/tuple children.
+        ##
+        ## For example, a QWidget usually needs a layout to place child
+        ## widgets; while a QMenu accepts multiple QAction/QMenu by itself.
+        if isinstance(parent, (QActionGroup, QLayout)):
+            ## if `parent' can handle children
             return parent
         elif isinstance(parent, QMenu):
-            #if isinstance(children, list) and contained:
-            #    return 'action_group'
-            #elif isinstance(children, tuple) and contained:
-            #    return 'action_group'
-            #else:
-            #    return parent
-            return parent
+            ## QMenu can handle children, but sometimes we need a QActionGroup
+            if isinstance(children, tuple):
+                return 'action_group'
+            else:
+                return parent
         elif isinstance(children, list):
             return 'h_box_layout'
         elif isinstance(children, tuple):

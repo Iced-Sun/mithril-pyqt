@@ -4,6 +4,9 @@ from PyQt5.QtCore import Qt
 run([
     ## fundamental support
     ('No layout', m('widget', [{'container': None}, label('1'), label('  2')])),
+    ('Explicit layout 1', m('widget', m('h_box_layout', [label('1'), label('2')]))),
+    ('Explicit layout 2', m('widget', m('h_box_layout', [{'container': None}, label('1'), label('2')]))),
+
     ('H', m('Widget', [label('1'), label('2'), label('3')])),
     ('H+attr', m('Widget', [{'container': True, 'spacing': 30}, label('1'), label('2')])),
 
