@@ -87,7 +87,7 @@ functions are: ~child = QObject(parent)~, ~parent.add_*(child)~,
    #+BEGIN_SRC python
      pl = QLabel(parent=None)
      cl = QLabel(parent=pl)
-     # no-op
+     # pl.attach(cl)          no-op
    #+END_SRC
 
 3. The difference between the family of ~parent.set_*~
@@ -150,9 +150,9 @@ which generates
   layout.addWidget(child_2)                # 'addWidget' is inferred from layout and child_2
 #+END_SRC
 
-Because the usage of a layout is so common, a layout will be automatically
-inserted when a list or a tuple of elements is encountered. The layout is
-referred to as a /container/.
+Because the usage of a layout is so convenient and common, a layout will be
+automatically inserted when a list or a tuple of elements is encountered. The
+layout is referred to as a /container/.
 
 With the implicit container mechanism, ~label('parent', [label('child 1'),
 label('child 2')])~ is now exactly the same as [[src.python.explicit.layout][explict layout contruction]].
@@ -165,8 +165,8 @@ which now generates codes in [[src.python.naive.multiple.children][naive multipl
 overlapped labels. See [[container.with.attributes][container with attributes]] for more information.
 
 ** Container types
-As pointed above, a list or tuple of cells will be by default wrapped in a
-newly created container. If the cells are widgets, the container will be a
+As pointed above, the cells inside a list or tuple will be by default wrapped
+in a newly created container. If the cells are widgets, the container will be a
 ~QLayout~. Specifically, the container is determined by the type of the parent
 and children, where
 | parent \vert children | ~list~        | ~tuple~        |
