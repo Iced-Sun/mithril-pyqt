@@ -120,33 +120,66 @@ is basically
   child = QLabel('child', parent=parent)
 #+END_SRC
 
-** Children wrapped in a container
-A list or tuple of cells will be wrapped in a container by default. To skip the
-creation of a container or change the behavior of the container, see [[container.with.attributes][next section]].
-
-For instance,
-#+BEGIN_SRC python
-  m('label', 'parent', [m('label', 'child A'), m('label', 'child B')])
-#+END_SRC
-is translated to
+** Multiple children
+Take ~label('parent', [label('child 1'), label('child 2')])~ as an example, if
+we interpret it as
+#+NAME: src.python.naive.multiple.children
 #+BEGIN_SRC python
   parent = QLabel('parent', parent=None)
-  container = QHBoxLayout(parent=parent)
+  child1 = QLabel('child 1', parent=parent)
+  child2 = QLabel('child 2', parent=parent)
+#+END_SRC
+~child1~ and ~child2~ will be placed to the same position of ~parent~, hence
+they are overlapping each other.
 
-  child_a = QLabel('child A', parent=None) # Note: don't set the parent here
-  container.addWidget(child_a)             # auto re-parent by QLayout
+A layout can place multiple widgets for us (without overlapping), \eg,
+#+NAME: src.python.explicit.layout
+#+BEGIN_SRC python
+  label('parent', m('h_box_layout', [label('child 1'), label('child 2')]))
+#+END_SRC
+which generates
+#+BEGIN_SRC python
+  parent = QLabel('parent', parent=None)
+  layout = QHBoxLayout(parent=parent)
+  parent.addLayout(layout)                 # 'addLayout' is inferred from parent and layout
 
-  child_b = QLabel('child B', parent=None)
-  container.addWidget(child_b)
+  child_1 = QLabel('child 1', parent=None) # don't set parent for child_1
+  layout.addWidget(child_1)                # because it will be auto-reparented
+
+  child_2 = QLabel('child 2', parent=None) # don't set parent for child_2
+  layout.addWidget(child_2)                # 'addWidget' is inferred from layout and child_2
 #+END_SRC
 
-The container type is automatically inferred by the type of the parent and
-children, \ie,
-|                | ~list~        | ~tuple~       |
-|----------------+---------------+---------------|
-| ~QWidget~      | ~QHBoxLayout~ | ~QVBoxLayout~ |
-| ~QActionGroup~ | self          | -             |
-| ~QMenu~        | self          | self          |
+Because the usage of a layout is so common, a layout will be automatically
+inserted when a list or a tuple of elements is encountered. The layout is
+referred to as a /container/.
+
+With the implicit container mechanism, ~label('parent', [label('child 1'),
+label('child 2')])~ is now exactly the same as [[src.python.explicit.layout][explict layout contruction]].
+
+The container can be skipped by writing
+#+BEGIN_SRC python
+  label('parent', [{'container': None}, label('child 1'), label('child 2')])
+#+END_SRC
+which now generates codes in [[src.python.naive.multiple.children][naive multiple children appending]] that produces
+overlapped labels. See [[container.with.attributes][container with attributes]] for more information.
+
+** Container types
+As pointed above, a list or tuple of cells will be by default wrapped in a
+newly created container. If the cells are widgets, the container will be a
+~QLayout~. Specifically, the container is determined by the type of the parent
+and children, where
+| parent \vert children | ~list~        | ~tuple~        |
+|-----------------------+---------------+----------------|
+| ~QWidget~             | ~QHBoxLayout~ | ~QVBoxLayout~  |
+| ~QMenu~               | self          | ~QActionGroup~ |
+| ~QActionGroup~        | self          | -              |
+| ~QLayout~             | self          | self           |
+
+As shown, the container may not be constructed, \eg, if the parent is ~QMenu~,
+the child menus and actions wrapped in a list are directly appended to the
+parent menu. The inserted container will never be a ~QWidget~ (both ~QLayout~
+and ~QActionGroup~ are behaivor managers).
 
 ** Container with attributes <<container.with.attributes>>
 The container could have attributes and constructor arguments (/not supported
@@ -164,60 +197,22 @@ is translated to
   container.addWidget(QLabel('2', parent=None))
 #+END_SRC
 
-The container will not be constructed if the ~container~ attribute is set to ~None~.
+The container will not be constructed if ~{'container': None}~ attribute is
+met.
 
-** Container element other than a cell
-A container (\eg, ~QMenu~, ~QLayout~) may have a non-object element, such as a
-separator, a spacing or a stretch, \etc. This could be simply done by inserting
-a plain string.
-
-#+BEGIN_SRC python
-  m('widget', [m('label', '1'), 'stretch', m('label', '2')])
-#+END_SRC
-generates
-#+BEGIN_SRC python
-  parent = QLabel('parent', parent=None)
-  container = QHBoxLayout(parent=parent)
-  container.addWidget(QLabel('1', parent=None))
-  container.addStretch()
-  container.addWidget(QLabel('2', parent=None))
-#+END_SRC
-
-** Container element with extra arguments
-Whether a container element is a cell or not, extra arguments may need be
-passed to the ~add_*~ functions. A helper function ~m.add(method_or_cell,
-*method_args)~ (get a better name or representation?) is thus provided for the
-task.
-
-~m.add()~ is only applicable in a container.
-
-#+BEGIN_SRC python
-  m('Widget', ['stretch', m('label', '1'), m.add('spacing', 80),  m.add(m('label', '2'), 0, Qt.AlignLeft)])
-#+END_SRC
-is expanded to
-#+BEGIN_SRC python
-  widget = QWidget(parent=None)
-  container = QHBoxLayout(parent=widget)
-  container.addStretch()
-  container.addWidget(QLabel('1', parent=None))
-  container.addSpacing(80)
-  container.addWidget(QLabel('2', parent=None), 0, Qt.AlignLeft)
-#+END_SRC
-
-** The ~QGridLayout~ container
-The container logic is very neat when a grid layout is in need. Take this as an
-example:
+*** ~QGridLayout~
+The ~QGridLayout~ is not automatically inferred but need manual configuration:
 #+BEGIN_SRC python
   m('widget', [
       {'container': 'grid', 'columns': 3},
 
-      m('label', '1'), None,            m('label', '3'),
-      None,            m('label', '5'), None,
-      m('label', '7'), None,            m('label', '9')
+      label('1'), None,       label('3'),
+      None,       label('5'), None,
+      label('7'), None,       label('9')
   ])
 #+END_SRC
 will create a ~QGridLayout~ with 3 columns. ~None~ indicates a position which
-is not occupied.
+is not occupied (a placeholder).
 
 The expanded code will read as
 #+BEGIN_SRC python
@@ -231,7 +226,8 @@ The expanded code will read as
 #+END_SRC
 
 ** Nested container
-A grid layout can be emulated by nesting ~QVBoxlayout~ and ~QHBoxlayout~.
+A nested tuple/list produces nested container. A grid layout can be emulated by
+nesting ~QVBoxlayout~ and ~QHBoxlayout~.
 
 The following three layout are visually the same.
 
@@ -239,39 +235,81 @@ Vanilla ~QGridLayout~:
 #+BEGIN_SRC python
   m('Widget', [
       {'container': 'grid', 'columns': 3},
-      m('label', '1'), m('label', '2'), m('label', '3'),
-      m('label', '4'), m('label', '5'), m('label', '6'),
-      m('label', '7'), m('label', '8'), m('label', '9')
+      label('1'), label('2'), label('3'),
+      label('4'), label('5'), label('6'),
+      label('7'), label('8'), label('9')
   ])
 #+END_SRC
 
-~QVBoxLayout~ nested in ~QHBoxLayout~:
+~QVBoxLayout~ nested in ~QHBoxLayout~ (note the order of numbers):
 #+BEGIN_SRC python
   m('Widget', [
-      (m('label', '1'), m('label', '4'), m('label', '7')),
-      (m('label', '2'), m('label', '5'), m('label', '8')),
-      (m('label', '3'), m('label', '6'), m('label', '9'))
+      (label('1'), label('4'), label('7')),
+      (label('2'), label('5'), label('8')),
+      (label('3'), label('6'), label('9'))
   ])
 #+END_SRC
 
 ~QHBoxLayout~ nested in ~QVBoxLayout~:
 #+BEGIN_SRC python
   m('Widget', (
-      [m('label', '1'), m('label', '2'), m('label', '3')],
-      [m('label', '4'), m('label', '5'), m('label', '6')],
-      [m('label', '7'), m('label', '8'), m('label', '9')]
+      [label('1'), label('2'), label('3')],
+      [label('4'), label('5'), label('6')],
+      [label('7'), label('8'), label('9')]
   ))
 #+END_SRC
 
-** Nested container with extra arguments
-A relatively complex example:
+** Container element other than a cell
+A container (\eg, ~QMenu~, ~QLayout~) may have a non-cell element, such as a
+separator, a spacing or a stretch, \etc. This could be simply done by placing a
+plain string.
+
+The ~None~ placeholder in a ~QGridLayout~ is non-cell element, too.
+
+#+BEGIN_SRC python
+  m('widget', [label('1'), 'stretch', label('2')])
+#+END_SRC
+generates
+#+BEGIN_SRC python
+  parent = QLabel('parent', parent=None)
+  container = QHBoxLayout(parent=parent)
+  container.addWidget(QLabel('1', parent=None))
+  container.addStretch()
+  container.addWidget(QLabel('2', parent=None))
+#+END_SRC
+
+** Container element with arguments
+Whether a container element is a cell or not, extra arguments may need be
+passed to the ~add_*~ functions. A helper function ~m.add(method_or_cell,
+*method_args)~ (think of a better name or representation?) is provided for the
+task.
+
+~m.add()~ is only applicable inside a container.
+
+#+BEGIN_SRC python
+  m('Widget', ['stretch', label('1'), m.add('spacing', 80),  m.add(label('2'), 0, Qt.AlignLeft)])
+#+END_SRC
+is expanded to
+#+BEGIN_SRC python
+  widget = QWidget(parent=None)
+  container = QHBoxLayout(parent=widget)
+  container.addStretch()
+  container.addWidget(QLabel('1', parent=None))
+  container.addSpacing(80)
+  container.addWidget(QLabel('2', parent=None), 0, Qt.AlignLeft)
+#+END_SRC
+
+** Nested container with arguments
+Since a inner container is an element of the outter container, it can have
+arguments as well.
+
 #+BEGIN_SRC python
   m('widget', [
       {'container': 'grid', 'columns': 3},
 
-      m.add([m('label', '1'), m('label', '1')], 1, 2),  None,            m('label', '3'),
-      m.add((m('label', '4'), m('label', '4')), 2, 1),  m('label', '5'), m('label', '6'),
-      None,                                             m('label', '8'), m('label', '9')
+      m.add([label('1'), label('1')], 1, 2),  None,       label('3'),
+      m.add((label('4'), label('4')), 2, 1),  label('5'), label('6'),
+      None,                                   label('8'), label('9')
   ])
 #+END_SRC
 generates
@@ -279,7 +317,7 @@ generates
   widget = QWidget(parent=None)
   container = QGridLayout(parent=widget)
 
-  ## m.add([m('label', '1'), m('label', '1')], 1, 2)
+  ## m.add([label('1'), label('1')], 1, 2)
   sub_container1 = QHBoxLayout(parent=container)
   sub_container1.addWidget(QLabel('1', parent=None))
   sub_container1.addWidget(QLabel('1', parent=None))

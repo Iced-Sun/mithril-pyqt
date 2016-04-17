@@ -3,7 +3,7 @@ from config import *
 from PyQt5.QtCore import Qt
 run([
     ## fundamental support
-    ('No layout', m('widget', [{'container': None}, label('1'), label('  2')])),
+    ('No layout (overlap)', m('widget', [{'container': None}, label('1'), label('2')])),
     ('Explicit layout 1', m('widget', m('h_box_layout', [label('1'), label('2')]))),
     ('Explicit layout 2', m('widget', m('h_box_layout', [{'container': None}, label('1'), label('2')]))),
 
