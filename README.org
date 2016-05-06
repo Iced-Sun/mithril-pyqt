@@ -106,7 +106,8 @@ used instead of ~m('label', 'text')~.
       return m('label', *args)
 #+END_SRC
 
-** Single child
+** Widget and Layout
+*** Single child
 The example shows a parent element with argument and attribute and its child
 element.
 
@@ -120,7 +121,7 @@ is basically
   child = QLabel('child', parent=parent)
 #+END_SRC
 
-** Multiple children
+*** Multiple children
 Take ~label('parent', [label('child 1'), label('child 2')])~ as an example, if
 we interpret it as
 #+NAME: src.python.naive.multiple.children
@@ -164,7 +165,7 @@ The container can be skipped by writing
 which now generates codes in [[src.python.naive.multiple.children][naive multiple children appending]] that produces
 overlapped labels. See [[container.with.attributes][container with attributes]] for more information.
 
-** Container types
+*** Container types
 As pointed above, the cells inside a list or tuple will be by default wrapped
 in a newly created container. If the cells are widgets, the container will be a
 ~QLayout~. Specifically, the container is determined by the type of the parent
@@ -181,7 +182,7 @@ the child menus and actions wrapped in a list are directly appended to the
 parent menu. The inserted container will never be a ~QWidget~ (both ~QLayout~
 and ~QActionGroup~ are behaivor managers).
 
-** Container with attributes <<container.with.attributes>>
+*** Container with attributes <<container.with.attributes>>
 The container could have attributes and constructor arguments (/not supported
 yet/).
 
@@ -200,7 +201,7 @@ is translated to
 The container will not be constructed if ~{'container': None}~ attribute is
 met.
 
-*** ~QGridLayout~
+**** ~QGridLayout~
 The ~QGridLayout~ is not automatically inferred but need manual configuration:
 #+BEGIN_SRC python
   m('widget', [
@@ -225,7 +226,7 @@ The expanded code will read as
   container.addWidget(QLabel('9',parent=None), 2, 2)
 #+END_SRC
 
-** Nested container
+*** Nested container
 A nested tuple/list produces nested container. A grid layout can be emulated by
 nesting ~QVBoxlayout~ and ~QHBoxlayout~.
 
@@ -259,7 +260,7 @@ Vanilla ~QGridLayout~:
   ))
 #+END_SRC
 
-** Container element other than a cell
+*** Container element other than a cell
 A container (\eg, ~QMenu~, ~QLayout~) may have a non-cell element, such as a
 separator, a spacing or a stretch, \etc. This could be simply done by placing a
 plain string.
@@ -278,7 +279,7 @@ generates
   container.addWidget(QLabel('2', parent=None))
 #+END_SRC
 
-** Container element with arguments
+*** Container element with arguments
 Whether a container element is a cell or not, extra arguments may need be
 passed to the ~add_*~ functions. A helper function ~m.add(method_or_cell,
 *method_args)~ (think of a better name or representation?) is provided for the
@@ -299,7 +300,7 @@ is expanded to
   container.addWidget(QLabel('2', parent=None), 0, Qt.AlignLeft)
 #+END_SRC
 
-** Nested container with arguments
+*** Nested container with arguments
 Since a inner container is an element of the outter container, it can have
 arguments as well.
 
@@ -339,3 +340,4 @@ generates
   container.addWidget(QLabel('9', parent=None), 2, 2)
 #+END_SRC
 
+** Signal and Slot
