@@ -157,7 +157,11 @@ def build_dict(parent, data, cached):
         pass
 
     ## create this element with parent
-    element = element_type(*data['tag'][1:], parent)
+    if impl.qt_inspector.accept_parent(element_type):
+        element = element_type(*data['tag'][1:], parent)
+    else:
+        element = element_type(*data['tag'][1:])
+        pass
 
     ## apply attributes on this element
     for key, val in data.get('attrs',{}).items():
