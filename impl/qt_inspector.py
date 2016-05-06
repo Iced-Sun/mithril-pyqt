@@ -21,6 +21,9 @@ def suggest_container(parent, children, container_hint):
         if isinstance(parent, (QActionGroup, QLayout)):
             ## if `parent' can handle children
             return parent
+        elif isinstance(parent, (QMainWindow,)):
+            ## if `parent' is a widget with a layout installed
+            return parent
         elif isinstance(parent, QMenu):
             ## QMenu can handle children, but sometimes we need a QActionGroup
             if isinstance(children, tuple):
@@ -103,6 +106,11 @@ def get_unbound_attach_method(Parent, Child):
         else:
             ## This should not happen...
             method = None
+            pass
+    elif issubclass(Child, QToolBar):
+        if issubclass(Parent, QMainWindow):
+            method = Parent.addToolBar
+            pass
     elif issubclass(Parent, QWidget) and issubclass(Child, QWidget):
         ## already visually attached
         pass
