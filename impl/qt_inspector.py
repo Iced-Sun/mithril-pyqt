@@ -24,8 +24,8 @@ def suggest_container(parent, children, container_hint):
         elif isinstance(parent, (QMainWindow,)):
             ## if `parent' is a widget with a layout installed
             return parent
-        elif isinstance(parent, QMenu):
-            ## QMenu can handle children, but sometimes we need a QActionGroup
+        elif isinstance(parent, (QMenuBar, QMenu, QToolBar)):
+            ## QMenu/QToolBar can handle children, but sometimes we need a QActionGroup
             if isinstance(children, tuple):
                 return 'action_group'
             else:
