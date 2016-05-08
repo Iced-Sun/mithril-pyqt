@@ -149,19 +149,23 @@ def apply_attribute_to(element, key, val):
     pass
 
 def build_dict(parent, data, cached):
-    ## parse tag
+    ## find the element type
     if isinstance(data['tag'][0], str):
         element_type = impl.qt_inspector.find_qt_class(data['tag'][0])
     else:
         element_type = data['tag'][0]
         pass
 
-    ## create this element with parent
+    ## recursively build the element arguments (without parent)
+    element_args = [build(None, _make_cell(arg)) if _like_a_cell(arg) else arg for arg in data['tag'][1:]]
+
+    ## append parent argument if necessary
     if impl.qt_inspector.accept_parent(element_type):
-        element = element_type(*data['tag'][1:], parent)
-    else:
-        element = element_type(*data['tag'][1:])
+        element_args.append(parent)
         pass
+
+    ## build the element
+    element = element_type(*element_args)
 
     ## apply attributes on this element
     for key, val in data.get('attrs',{}).items():
