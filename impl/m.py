@@ -115,7 +115,7 @@ def build_dict(parent, data, cached):
         pass
 
     ## recursively build the element arguments (without parent)
-    element_args = [build(None, impl.cell.make_cell(arg)) if impl.cell._like_a_cell(arg) else arg for arg in data['tag'][1:]]
+    element_args = [build(None, arg) if impl.cell.is_cell(arg) else arg for arg in data['tag'][1:]]
 
     ## append parent argument if necessary
     if impl.qt_inspector.accept_parent(element_type):
