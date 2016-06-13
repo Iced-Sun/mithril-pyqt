@@ -50,7 +50,9 @@ def m(tag, *args):
 
 def apply_attribute_to(element, key, val):
     if hasattr(element, impl.util.snake_to_camel('set_'+key)):
-        if isinstance(val, impl.cell._Cell):
+        if impl.cell.is_cell(val):
+            ## set_central_widget alike methods
+            ##
             ## auto re-parent
             getattr(element, impl.util.snake_to_camel('set_'+key))(build(None, val))
         else:
@@ -59,13 +61,14 @@ def apply_attribute_to(element, key, val):
     elif key.startswith('on_') and hasattr(element, impl.util.snake_to_camel(key[3:])):
         signal = getattr(element, impl.util.snake_to_camel(key[3:]))
 
-        ## the `val' is the a slot, just connect them and return
+        ## the `val' is a slot, just connect them and return
         if callable(val):
             signal.connect(val)
             ### NOTE exit point
             return
 
-        ## normalize the `val' if it is a flatten shortcut, e.g., '#label4::set_text'
+        ## normalize the `val' if it is a flatten shortcut, e.g.,
+        ## '#label4::set_text'
         if isinstance(val, str):
             val = {'slot': val}
             pass
@@ -152,7 +155,7 @@ def build_list(parent, data, cached):
         supported_custom_attributes = {'container', 'columns'}
 
         ## extract the attributes from the list
-        if len(data) and isinstance(data[0], dict) and not isinstance(data[0], impl.cell._Cell):
+        if len(data) and isinstance(data[0], dict) and not impl.cell.is_cell(data[0]):
             attrs = data[0]
             meta_attrs = {k:attrs.pop(k) for k in supported_custom_attributes & attrs.keys()}
             data = data[1:]
@@ -190,10 +193,9 @@ def build_list(parent, data, cached):
         if isinstance(adder.target, str):
             ## the callback is specified by name, e.g., `spacing' -> `addSpacing'
             adder.target = getattr(parent, impl.util.snake_to_camel('add_{}'.format(adder.target)))
-        elif isinstance(adder.target, (impl.cell._Cell, list, tuple)):
-            ## if the target is a cell or container (impl.cell.make_cell() will add
-            ## a container_cell tag), deduce a callback by the types of parent
-            ## and child
+        elif impl.cell.can_be_coverted_to_children_cells(adder.target):
+            ## if the target is actually the children, deduce a callback by the
+            ## types of parent and child
             element = build(impl.qt_inspector.suggest_parent(parent), impl.cell.make_cell(adder.target))
             adder.target = impl.qt_inspector.get_bound_attach_method(parent, element)
         elif adder.target is None:

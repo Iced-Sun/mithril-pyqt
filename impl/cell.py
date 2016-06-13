@@ -45,7 +45,7 @@ def _tag_cell(obj):
     if typ not in _tagged_cell_types:
         class _Tagged_cell(typ, _Cell):
             def __repr__(self):
-                return '_Tagged_{}_cell({})'.format(typ, super().__repr__())
+                return '_Tagged_{}_cell({})'.format(typ.__name__, super().__repr__())
             pass
         _tagged_cell_types[typ] = _Tagged_cell
         pass
