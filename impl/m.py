@@ -1,10 +1,11 @@
 import impl.qt_inspector
 import impl.util
 
-class _Cell_tag(object):
+## FIXME reconsider the cell things
+class _Cell(object):
     pass
 
-class _Contained_cell(list, _Cell_tag):
+class _Contained_cell(list, _Cell):
     def __init__(self, meta_attrs, *args):
         super().__init__(*args)
         self.meta_attrs = meta_attrs
@@ -27,7 +28,7 @@ def _make_cell(obj=None):
                 break
             continue
 
-        class _Tagged_cell(reduced_type, _Cell_tag):
+        class _Tagged_cell(reduced_type, _Cell):
             def __repr__(self):
                 return '_Tagged_cell({})'.format(super().__repr__())
             pass
@@ -43,7 +44,7 @@ def _like_a_cell(obj):
     else:
         flat_obj = [obj]
         pass
-    return any(isinstance(x, _Cell_tag) for x in flat_obj)
+    return any(isinstance(x, _Cell) for x in flat_obj)
 
 def m(tag, *args):
     cell = _make_cell()
@@ -53,7 +54,7 @@ def m(tag, *args):
     args = list(args)
 
     ## attached children: a list, tuple, or _Cell
-    if args and isinstance(args[-1], (list, tuple, _Cell_tag)):
+    if args and isinstance(args[-1], (list, tuple, _Cell)):
         cell['children'] = _make_cell(args.pop())
         pass
 
@@ -92,7 +93,7 @@ def m(tag, *args):
 
 def apply_attribute_to(element, key, val):
     if hasattr(element, impl.util.snake_to_camel('set_'+key)):
-        if isinstance(val, _Cell_tag):
+        if isinstance(val, _Cell):
             ## auto re-parent
             getattr(element, impl.util.snake_to_camel('set_'+key))(build(None, val))
         else:
@@ -194,7 +195,7 @@ def build_list(parent, data, cached):
         supported_custom_attributes = {'container', 'columns'}
 
         ## extract the attributes from the list
-        if len(data) and isinstance(data[0], dict) and not isinstance(data[0], _Cell_tag):
+        if len(data) and isinstance(data[0], dict) and not isinstance(data[0], _Cell):
             attrs = data[0]
             meta_attrs = {k:attrs.pop(k) for k in supported_custom_attributes & attrs.keys()}
             data = data[1:]
@@ -232,7 +233,7 @@ def build_list(parent, data, cached):
         if isinstance(adder.target, str):
             ## the callback is specified by name, e.g., `spacing' -> `addSpacing'
             adder.target = getattr(parent, impl.util.snake_to_camel('add_{}'.format(adder.target)))
-        elif isinstance(adder.target, (_Cell_tag, list, tuple)):
+        elif isinstance(adder.target, (_Cell, list, tuple)):
             ## if the target is a cell or container (_make_cell will add a
             ## container_cell tag), deduce a callback by the types of parent
             ## and child
@@ -270,7 +271,7 @@ def build(parent_element, data, cached=None):
     if not data:
         ## could be None when trying to build children
         element = None
-    elif isinstance(data, _Cell_tag):
+    elif isinstance(data, _Cell):
         if isinstance(data, dict):
             element = build_dict(parent_element, data, cached)
         elif isinstance(data, (list, tuple)):
