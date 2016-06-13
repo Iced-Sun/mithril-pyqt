@@ -3,7 +3,8 @@ import impl.qt_inspector
 import impl.util
 
 def m(tag, *args):
-    cell = impl.cell.make_cell()
+    ## self
+    cell = impl.cell.make_cell({})
 
     ## parse args in reverse order
     # for list::pop()
@@ -49,7 +50,7 @@ def m(tag, *args):
 
 def apply_attribute_to(element, key, val):
     if hasattr(element, impl.util.snake_to_camel('set_'+key)):
-        if isinstance(val, _Cell):
+        if isinstance(val, impl.cell._Cell):
             ## auto re-parent
             getattr(element, impl.util.snake_to_camel('set_'+key))(build(None, val))
         else:
@@ -228,7 +229,7 @@ def build(parent_element, data, cached=None):
         ## could be None when trying to build children
         element = None
     elif impl.cell.is_cell(data):
-        if hasattr(data, '_cached_pyqt_object'):
+        if False: #hasattr(data, '_cached_pyqt_object'):
             print('cache hit!')
             element = data._cached_pyqt_object
         else:

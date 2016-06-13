@@ -1,3 +1,8 @@
+"""A cell is basically a tagged dict, tuple or list, to be distinguished from
+the plain objects.
+
+"""
+
 ## public interface
 def can_be_coverted_to_children_cells(obj):
     # m(_,_,children) accepts list/tuple/Cell as children
@@ -6,23 +11,15 @@ def can_be_coverted_to_children_cells(obj):
 def is_cell(obj):
     return isinstance(obj, _Cell)
 
-def make_cell(obj=None):
+def make_cell(obj):
     """promote a plain-type object as a cell by adding a tag
 
     """
-    if obj is None:
-        obj = {}
-        pass
-
-    if isinstance(obj, _Contained_cell):
-    #if isinstance(obj, _Cell):
+    if is_cell(obj):
         return obj
-    elif isinstance(obj, dict):
-        return _Dict_cell(obj)
-    elif isinstance(obj, list):
-        return _List_cell(obj)
-    elif isinstance(obj, tuple):
-        return _Tuple_cell(obj)
+
+    if isinstance(obj, (dict, list, tuple)):
+        return _tag_cell(obj)
     else:
         raise RuntimeError('Unknown type {} to convert to a cell'.format(obj))
     pass
@@ -40,20 +37,19 @@ def _like_a_cell(obj):
 class _Cell(object):
     pass
 
-class _Dict_cell(dict, _Cell):
-    def __repr__(self):
-        return '_Dict_cell({})'.format(super().__repr__())
-    pass
+_tagged_cell_types = {}
 
-class _List_cell(list, _Cell):
-    def __repr__(self):
-        return '_List_cell({})'.format(super().__repr__())
-    pass
+def _tag_cell(obj):
+    typ = type(obj)
+    if typ not in _tagged_cell_types:
+        class _Tagged_cell(typ, _Cell):
+            def __repr__(self):
+                return '_Tagged_{}_cell({})'.format(typ, super().__repr__())
+            pass
+        _tagged_cell_types[typ] = _Tagged_cell
+        pass
 
-class _Tuple_cell(tuple, _Cell):
-    def __repr__(self):
-        return '_Tuple_cell({})'.format(super().__repr__())
-    pass
+    return _tagged_cell_types[typ](obj)
 
 class _Contained_cell(list, _Cell):
     """promote a cell-tagged list to a container cell, with extra attributes (in
