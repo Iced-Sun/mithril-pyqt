@@ -10,8 +10,19 @@ class _Contained_cell(list, _Cell):
         super().__init__(*args)
         self.meta_attrs = meta_attrs
         pass
+class _Dict_cell(dict, _Cell):
     def __repr__(self):
-        return '_Contained_cell({})'.format(super().__repr__())
+        return '_Dict_cell({})'.format(super().__repr__())
+    pass
+
+class _List_cell(list, _Cell):
+    def __repr__(self):
+        return '_List_cell({})'.format(super().__repr__())
+    pass
+
+class _Tuple_cell(tuple, _Cell):
+    def __repr__(self):
+        return '_Tuple_cell({})'.format(super().__repr__())
     pass
 
 def _make_cell(obj=None):
@@ -21,18 +32,13 @@ def _make_cell(obj=None):
 
     if isinstance(obj, _Contained_cell):
         return obj
-    elif isinstance(obj, (dict, list, tuple)):
-        for _ in (dict, list, tuple):
-            if isinstance(obj, _):
-                reduced_type = _
-                break
-            continue
-
-        class _Tagged_cell(reduced_type, _Cell):
-            def __repr__(self):
-                return '_Tagged_cell({})'.format(super().__repr__())
-            pass
-        return _Tagged_cell(obj)
+    # reduce to plain type to avoid infinite recursion
+    elif isinstance(obj, dict):
+        return _Dict_cell(obj)
+    elif isinstance(obj, list):
+        return _List_cell(obj)
+    elif isinstance(obj, tuple):
+        return _Tuple_cell(obj)
     else:
         raise RuntimeError('Unsupported cell type {}'.format(obj))
     pass
