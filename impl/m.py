@@ -207,7 +207,7 @@ def build_list(parent, data, cached):
         ## build cells inside the adder arguments
         adder.forwarder.args = tuple(
             build(impl.qt_inspector.suggest_parent(parent), impl.cell.make_cell(arg))
-            if _like_a_cell(arg) else arg
+            if impl.cell.is_or_has_a_cell(arg) else arg
             for arg in adder.forwarder.args
         )
 

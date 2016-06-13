@@ -1,3 +1,5 @@
+import impl.util
+
 """A cell is basically a tagged dict, tuple or list, to be distinguished from
 the plain objects.
 
@@ -24,8 +26,7 @@ def make_cell(obj):
         raise RuntimeError('Unknown type {} to convert to a cell'.format(obj))
     pass
 
-def _like_a_cell(obj):
-    ## If obj contains or is a cell
+def is_or_has_a_cell(obj):
     if isinstance(obj, (list, tuple)):
         flat_obj = list(impl.util.flatten(obj))
     else:
