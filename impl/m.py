@@ -5,11 +5,6 @@ import impl.util
 class _Cell(object):
     pass
 
-class _Contained_cell(list, _Cell):
-    def __init__(self, meta_attrs, *args):
-        super().__init__(*args)
-        self.meta_attrs = meta_attrs
-        pass
 class _Dict_cell(dict, _Cell):
     def __repr__(self):
         return '_Dict_cell({})'.format(super().__repr__())
@@ -26,6 +21,9 @@ class _Tuple_cell(tuple, _Cell):
     pass
 
 def _make_cell(obj=None):
+    """promote a plain-type object as a cell by adding a tag
+
+    """
     if obj is None:
         obj = {}
         pass
@@ -41,6 +39,19 @@ def _make_cell(obj=None):
         return _Tuple_cell(obj)
     else:
         raise RuntimeError('Unsupported cell type {}'.format(obj))
+    pass
+
+class _Contained_cell(list, _Cell):
+    """promote a cell-tagged list to a container cell, with extra attributes (in
+    essence very alike to a dict cell).
+
+    """
+    def __init__(self, meta_attrs, *args):
+        super().__init__(*args)
+        self.meta_attrs = meta_attrs
+        pass
+    def __repr__(self):
+        return '_Contained_cell({}) with meta_attributes({})'.format(super().__repr__(), self.meta_attrs.__repr__())
     pass
 
 def _like_a_cell(obj):
