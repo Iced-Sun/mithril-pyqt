@@ -60,7 +60,7 @@ def find_qt_class(name):
     return
 
 def accept_parent(element_type):
-    if issubclass(element_type, QIcon):
+    if issubclass(element_type, (QIcon,)):
         return False
     else:
         return True
