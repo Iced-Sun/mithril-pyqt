@@ -1,16 +1,17 @@
 * TODOs
-** Test suite [5/7]
+** Test suite [6/7]
 - [X] ~simple.py~
 - [X] ~layout.py~
 - [X] ~grid.py~
 - [X] ~form.py~
 - [X] ~menu.py~
-- [ ] ~toolbar.py~
+- [X] ~toolbar.py~
 - [ ] ~signal.py~
 ** Features [0/3]
 - [ ] 'rows' attributes in grid layout
 - [ ] ability to take a ~QObject~ as children arguments in ~m()~
 - [ ] provide alternative call syntax, \eg, ~m.label(*)~ is ~m('label', *)~
+- [ ] check if a layout is installed
 
 * Introduction
 ~m(tag, *args=None, attributes=None, children=None)~ creates a ~cell~ object
@@ -183,6 +184,7 @@ parent menu. The inserted container will never be a ~QWidget~ (both ~QLayout~
 and ~QActionGroup~ are behaivor managers).
 
 *** Container with attributes <<container.with.attributes>>
+
 The container could have attributes and constructor arguments (/not supported
 yet/).
 
@@ -227,6 +229,7 @@ The expanded code will read as
 #+END_SRC
 
 *** Nested container
+
 A nested tuple/list produces nested container. A grid layout can be emulated by
 nesting ~QVBoxlayout~ and ~QHBoxlayout~.
 
@@ -261,6 +264,7 @@ Vanilla ~QGridLayout~:
 #+END_SRC
 
 *** Container element other than a cell
+
 A container (\eg, ~QMenu~, ~QLayout~) may have a non-cell element, such as a
 separator, a spacing or a stretch, \etc. This could be simply done by placing a
 plain string.
@@ -280,6 +284,7 @@ generates
 #+END_SRC
 
 *** Container element with arguments
+
 Whether a container element is a cell or not, extra arguments may need be
 passed to the ~add_*~ functions. A helper function ~m.add(method_or_cell,
 *method_args)~ (think of a better name or representation?) is provided for the
