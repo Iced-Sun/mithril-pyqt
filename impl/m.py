@@ -151,7 +151,7 @@ def build_dict(parent, data, cached):
 
 def build_list(parent, data, cached):
     ## find a container for data before we actually insert them
-    if not isinstance(data, impl.cell._Contained_cell):
+    if not impl.cell.is_cell(data, 'contained'):
         supported_custom_attributes = {'container', 'columns'}
 
         ## extract the attributes from the list
@@ -168,7 +168,7 @@ def build_list(parent, data, cached):
         container = impl.qt_inspector.suggest_container(parent, data, meta_attrs.get('container', True))
 
         ## mark the data as with a container, and keep the meta_attrs
-        cells = impl.cell._Contained_cell(meta_attrs, data)
+        cells = impl.cell.make_cell(data, meta_attrs)
 
         ## build the container and its children
         if isinstance(container, (str,type)):
