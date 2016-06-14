@@ -3,6 +3,14 @@ import impl.util
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 
+## predictors
+def accept_parent(element_type):
+    return not issubclass(element_type, (QIcon,))
+
+def allow_duplicates(element):
+    return isinstance(element, (QActionGroup, QAction))
+
+## actions
 def suggest_parent(parent_hint):
     if isinstance(parent_hint, QLayout):
         ## auto re-parent, need and should not set the parent
@@ -58,13 +66,6 @@ def find_qt_class(name):
     else:
         raise RuntimeError('Tag "{}" is not a supported widget type.'.format(name))
     return
-
-def accept_parent(element_type):
-    if issubclass(element_type, (QIcon,)):
-        return False
-    else:
-        return True
-    pass
 
 def get_unbound_attach_method(Parent, Child):
     """Return an unbound method of Parent that will visually attach the child

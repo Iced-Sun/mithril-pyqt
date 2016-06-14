@@ -226,13 +226,16 @@ def build_list(parent, data, cached):
     return None
 
 def build(parent_element, data, cached=None):
+    ### FIXME use an OO way to build elements? e.g., list_cell.build(),
+    ### dict_cell.build()??
+
     ## dispatch on data type
     if not data:
         ## could be None when trying to build children
         element = None
     elif impl.cell.is_cell(data):
-        if False: #hasattr(data, '_cached_pyqt_object'):
-            print('cache hit!')
+        ## FIXME hackish cache manipulation
+        if hasattr(data, '_cached_pyqt_object') and impl.qt_inspector.allow_duplicates(data._cached_pyqt_object):
             element = data._cached_pyqt_object
         else:
             if isinstance(data, dict):
@@ -242,7 +245,6 @@ def build(parent_element, data, cached=None):
             else:
                 raise RuntimeError('Unsupported cell "{}: {}"'.format(type(data), data))
             data._cached_pyqt_object = element
-            print('caching: ', data._cached_pyqt_object)
             pass
     else:
         raise RuntimeError('Unsupported cell "{}: {}"'.format(type(data), data))
@@ -250,10 +252,10 @@ def build(parent_element, data, cached=None):
     return element
 
 def render(root, cell, forceRecreation=False):
-    cache = build(root, cell)
-    cache.show()
+    obj_guard = build(root, cell)
+    obj_guard.show()
     #configs()
-    return cache
+    return obj_guard
     
 def mount(parent, Component, mount_method=None):
     app = QApplication(sys.argv)
