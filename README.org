@@ -12,6 +12,13 @@
 - [ ] ability to take a ~QObject~ as children arguments in ~m()~
 - [ ] provide alternative call syntax, \eg, ~m.label(*)~ is ~m('label', *)~
 - [ ] check if a layout is installed
+** NEXT Refactor
+The current implementation is a copy of mythril. Should be more pythonic, more
+OO.
+1. ~parent~, ~parent_delegator~ (instead of a ~container~), ~childern~
+2. a real ~cell~ class (maybe ~Element~?)
+3. think through how to implement if a parent is needed
+4. think through the ~adder~ thing
 
 * Introduction
 ~m(tag, *args=None, attributes=None, children=None)~ creates a ~cell~ object
